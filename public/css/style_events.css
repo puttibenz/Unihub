@@ -463,12 +463,6 @@ body {
     animation: fadeIn 1.5s ease-in-out;
 }
 
-.card-container {
-    animation: slideUp 1.8s ease-out; /* ใช้ animation ที่ต่างออกไป */
-    animation-delay: 0.5s; /* หน่วงเวลาให้ card ปรากฏหลังองค์ประกอบอื่น */
-    animation-fill-mode: forwards; /* รักษา state สุดท้ายของ animation */
-}
-
 /* Optional: Individual card animation */
 .card {
     opacity: 0; /* ซ่อน card ไว้ก่อน */

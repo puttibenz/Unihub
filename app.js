@@ -8,6 +8,7 @@ const authRoutes = require('./routes/auth');
 const eventRoutes = require('./routes/event');
 const universitiesRoutes = require('./routes/universities');
 const profileRoutes = require('./routes/profile');
+const announcementRoutes = require('./routes/announcement');    
 const db = require('./db'); // นำเข้าโมดูล db.js
 
 app.use(session({
@@ -44,6 +45,7 @@ app.use('/auth', authRoutes);
 app.use('/events', eventRoutes);
 app.use('/universities', universitiesRoutes);
 app.use('/profile', profileRoutes);
+app.use('/announcement', announcementRoutes);
 
 app.listen(3000, () => {
     console.log('Server is running')
