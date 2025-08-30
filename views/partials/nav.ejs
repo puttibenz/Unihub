@@ -18,15 +18,13 @@
                                     <a href="/crud" class="profile-btn">จัดการระบบ</a>
                                 <% } else if (user.email && Array.isArray(adminEmails) && adminEmails.includes(user.email)) { %>
                                     <a href="/crud" class="profile-btn">จัดการระบบ</a>
-                                <% } else if (user.role && user.role === 'admin') { %>
-                                    <a href="/crud" class="profile-btn">จัดการระบบ</a>
                                 <% } else { %>
                                     <a href="/profile" class="profile-btn">โปรไฟล์</a>
                                 <% } %>
                                 <a href="/auth/logout" class="logout-btn">ออกจากระบบ</a>
                             </div>
                         <% } else { %>
-                            <a href="/login" class="login-btn">เข้าสู่ระบบ</a>
+                            <a href="/auth/login" class="login-btn">เข้าสู่ระบบ</a>
                         <% } %>
                     </div>
                 </div>
