@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Announcements</title>
+    <link rel="stylesheet" href="/css/style_events.css">
+    <link rel="stylesheet" href="/css/user_btn.css">
+</head>
+<body>
+    <%- include('partials/nav') %>
+
+    <section class="page-header">
+        <div class="container">
+            <h1>ประกาศมหาวิทยาลัย</h1>
+            <p>ติดตามข่าวสารการรับสมัคร ทุนการศึกษา และโปรแกรมจากมหาวิทยาลัยชั้นนำ</p>
+        </div>
+    </section>
+
+    <section class="search-filter-section">
+        <div class="container">
+            <div class="search-filter-wrapper">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search" placeholder="ค้นหาประกาศ มหาวิทยาลัย หรือโปรแกรม..">
+                </div>
+
+                <div class="filters">
+                    <div class="dropdown">
+                        <select id="university-filter">
+                            <option value="">ทุกมหาวิทยาลัย</option>
+                            <option>จุฬาลงกรณ์มหาวิทยาลัย</option>
+                            <option>มหาวิทยาลัยมหิดล</option>
+                            <option>มหาวิทยาลัยธรรมศาสตร์</option>
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+
+                    <div class="dropdown">
+                        <select id="type-filter">
+                            <option value="">ทุกประเภท</option>
+                            <option>ทุนการศึกษา</option>
+                            <option>โปรแกรม</option>
+                            <option>รับสมัคร</option>
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-info">
+                <p><span id="count">4</span> ประกาศทั้งหมด</p>
+                <div class="sort-by">เรียงตามวันปิดรับสมัคร <i class="fas fa-sort"></i></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="events-grid-section">
+        <div class="container">
+            <div class="card-container" id="cards">
+                <% const sample = (typeof announcements !== 'undefined' && announcements) ? announcements : [
+                    {university:'จุฬาลงกรณ์มหาวิทยาลัย', tag:'TCAS1 - รับตรงร่วมกัน', title:'ประกาศรับสมัคร TCAS รอบที่ 1 (Portfolio)', deadline:'15 มกราคม 2026',  description:'รับสมัครนักเรียนที่มีผลงานด้านวิชาการ/กิจกรรมพิเศษ ผ่านระบบ Portfolio', color:'rgba(230,245,255,1)'} ,
+                    {university:'มหาวิทยาลัยมหิดล', tag:'TCAS2 - โควตา/รับตรง', title:'ประกาศคณะวิทยาศาสตร์ TCAS รอบที่ 2', deadline:'28 กุมภาพันธ์ 2026',  description:'รับผ่านคะแนนและข้อสอบเฉพาะของคณะ รายละเอียดคุณสมบัติและเอกสารดูที่เว็บไซต์คณะ'},
+                    {university:'มหาวิทยาลัยธรรมศาสตร์', tag:'TCAS3 - กสพท/Admission', title:'เปิดรับสมัคร TCAS รอบที่ 3 (Admission)', deadline:'10 มีนาคม 2026',  description:'การคัดเลือกโดยใช้คะแนนสอบกลางและเกณฑ์ของมหาวิทยาลัย'},
+                    {university:'มหาวิทยาลัยเชียงใหม่', tag:'TCAS4 - รับตรงอิสระ', title:'รับสมัครนักเรียนผ่านระบบ TCAS รอบที่ 4', deadline:'25 เมษายน 2026', description:'ประกาศคณะและสาขาต่าง ๆ เปิดรับสมัครแบบรับตรงอิสระ'},
+                ]; %>
+
+                <% sample.forEach(function(a){ %>
+                <article class="card">
+                    <div class="card-header">
+                        <div class="tags">
+                            <span class="tag university"><%= a.university %></span>
+                            <span class="tag"><%= a.tag %></span>
+                        </div>
+                        <h3><%= a.title %></h3>
+                    </div>
+                    <div class="card-body">
+                        <p><i class="fas fa-calendar-alt"></i> วันปิดรับสมัคร: <strong><%= a.deadline %></strong></p>
+                        <p class="description"><%= a.description %></p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn">ดูเพิ่มเติม</button>
+                        <div class="heart-icon">❤</div>
+                    </div>
+                </article>
+                <% }) %>
+
+            </div>
+        </div>
+    </section>
+
+    <%- include('partials/footer') %>
+
+    <!-- Minimal JS for interactivity (filter/search count) -->
+    <script>
+        (function(){
+            const search = document.getElementById('search');
+            const uni = document.getElementById('university-filter');
+            const type = document.getElementById('type-filter');
+            const cards = Array.from(document.querySelectorAll('.card'));
+            const countEl = document.getElementById('count');
+
+            function applyFilters(){
+                const q = search.value.toLowerCase();
+                const u = uni.value.toLowerCase();
+                const t = type.value.toLowerCase();
+                let visible = 0;
+                cards.forEach(card => {
+                    const text = card.innerText.toLowerCase();
+                    const matches = (!q || text.includes(q)) && (!u || text.includes(u)) && (!t || text.includes(t));
+                    card.style.display = matches ? 'flex' : 'none';
+                    if(matches) visible++;
+                });
+                countEl.innerText = visible;
+            }
+
+            [search, uni, type].forEach(el => el && el.addEventListener('input', applyFilters));
+            applyFilters();
+        })();
+    </script>
+
+    <!-- fontawesome for icons (local dev) -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>
