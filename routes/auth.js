@@ -4,6 +4,10 @@ const db = require('../db');
 const router = express.Router();
 
 // Register
+router.get('/register', (req,res) => {
+    res.render('register', {title:'Register'});
+});
+
 router.post('/register', async (req, res) => {
     const { name, lastname, school, email, password } = req.body;
     if (!name || !lastname || !school || !email || !password) {
@@ -28,6 +32,10 @@ router.post('/register', async (req, res) => {
 });
 
 // Login
+router.get('/login', (req,res) => {
+    res.render('login', {title:'Login'});
+});
+
 router.post('/login', (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {

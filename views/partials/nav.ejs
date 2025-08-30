@@ -12,9 +12,17 @@
 
                     <div class="nav-controls">
                         <% if (user) { %>
-                            <%= console.log(user); %>
                             <div class="user-menu-inline">
-                                <a href="/profile" class="profile-btn">โปรไฟล์</a>
+                                <% /* prefer email-based admin check, fallback to role */ %>
+                                <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                                    <a href="/crud" class="profile-btn">จัดการระบบ</a>
+                                <% } else if (user.email && Array.isArray(adminEmails) && adminEmails.includes(user.email)) { %>
+                                    <a href="/crud" class="profile-btn">จัดการระบบ</a>
+                                <% } else if (user.role && user.role === 'admin') { %>
+                                    <a href="/crud" class="profile-btn">จัดการระบบ</a>
+                                <% } else { %>
+                                    <a href="/profile" class="profile-btn">โปรไฟล์</a>
+                                <% } %>
                                 <a href="/auth/logout" class="logout-btn">ออกจากระบบ</a>
                             </div>
                         <% } else { %>
