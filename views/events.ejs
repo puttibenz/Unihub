@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>กิจกรรมมหาวิทยาลัย</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/style_events.css">
+    <link rel="stylesheet" href="/css/user_btn.css">
+</head>
+<body>
+    <%- include('partials/nav'); %>
+    
+    <section class="page-header">
+        <div class="container">
+            <div class="header-text">
+                <h1>กิจกรรมมหาวิทยาลัย</h1>
+                <p>ค้นพบกิจกรรมที่น่าสนใจจากมหาวิทยาลัยชั้นนำและก้าวไปสู่เส้นทางด้านการศึกษาของคุณ</p>
+            </div>
+        </div>
+    </section>
+    
+    <section class="search-filter-section">
+        <div class="container">
+            <div class="search-filter-wrapper">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="ค้นหากิจกรรม, มหาวิทยาลัย, หรือหัวข้อ...">
+                </div>
+                <div class="filters">
+                    <div class="dropdown">
+                        <select>
+                            <option>มหาวิทยาลัยทั้งหมด</option>
+                            <option>MIT</option>
+                            <option>Harvard University</option>
+                            <option>Stanford University</option>
+                            <option>Caltech</option>
+                            <option>Yale University</option>
+                            <option>Wharton</option>
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="dropdown">
+                        <select>
+                            <option>ประเภททั้งหมด</option>
+                            <option>OpenHouse</option>
+                            <option>Academic</option>
+                            <option>Social</option>
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="results-info">
+                <p>พบ 6 กิจกรรม</p>
+                <div class="sort-by">
+                    <span>เรียงตามวันที่</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="events-grid-section">
+        <div class="container">
+            <div class="card-container">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="tags">
+                            <span class="tag openhouse">OpenHouse</span>
+                            <span class="tag university">MIT</span>
+                        </div>
+                        <h3>งาน Open House ภาควิชาวิทยาการคอมพิวเตอร์</h3>
+                    </div>
+                    <div class="card-body">
+                        <p><i class="fas fa-calendar-alt"></i> 15 มีนาคม 2024</p>
+                        <p><i class="fas fa-clock"></i> 14:00 น. - 17:00 น.</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Campus Center, Boston</p>
+                        <p class="interested"><i class="fas fa-users"></i> 127 คนสนใจ</p>
+                        <p class="description">สำรวจหลักสูตรวิทยาการคอมพิวเตอร์ที่ล้ำสมัยของเราและพบปะกับคณาจารย์ เรียนรู้เกี่ยวกับโอกาสในการทำวิจัย...</p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn">เข้าร่วมกิจกรรม</button>
+                        <i class="far fa-heart heart-icon"></i>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="tags">
+                            <span class="tag academic">Academic</span>
+                            <span class="tag university">Harvard University</span>
+                        </div>
+                        <h3>เวิร์คช็อปสำหรับนักศึกษาเตรียมแพทย์</h3>
+                    </div>
+                    <div class="card-body">
+                        <p><i class="fas fa-calendar-alt"></i> 18 มีนาคม 2024</p>
+                        <p><i class="fas fa-clock"></i> 10:00 น. - 12:00 น.</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Medical School, Cambridge</p>
+                        <p class="interested"><i class="fas fa-users"></i> 89 คนสนใจ</p>
+                        <p class="description">เวิร์คช็อปเชิงโต้ตอบที่ครอบคลุมการเตรียมตัวสอบ MCAT, การสมัครเข้าเรียนแพทย์ และแนวทางการประกอบอาชีพสำหรับผู้ที่ต้องการเป็นแพทย์...</p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn">เข้าร่วมกิจกรรม</button>
+                        <i class="far fa-heart heart-icon"></i>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="tags">
+                            <span class="tag social">Social</span>
+                            <span class="tag university">Stanford University</span>
+                        </div>
+                        <h3>เทศกาลฤดูใบไม้ผลิในมหาวิทยาลัย</h3>
+                    </div>
+                    <div class="card-body">
+                        <p><i class="fas fa-calendar-alt"></i> 22 มีนาคม 2024</p>
+                        <p><i class="fas fa-clock"></i> 12:00 น. - 20:00 น.</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Main Quad, Palo Alto</p>
+                        <p class="interested"><i class="fas fa-users"></i> 245 คนสนใจ</p>
+                        <p class="description">มาร่วมเพลิดเพลินกับดนตรี อาหาร และความสนุกสนานตลอดวัน! พบปะกับนักศึกษาปัจจุบันและสัมผัสชีวิตในมหาวิทยาลัยที่สแตนฟอร์ด</p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn">เข้าร่วมกิจกรรม</button>
+                        <i class="far fa-heart heart-icon"></i>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="tags">
+                            <span class="tag academic">Academic</span>
+                            <span class="tag university">Caltech</span>
+                        </div>
+                        <h3>งานนวัตกรรมวิศวกรรม</h3>
+                    </div>
+                    <div class="card-body">
+                        <p><i class="fas fa-calendar-alt"></i> 25 มีนาคม 2024</p>
+                        <p><i class="fas fa-clock"></i> 13:00 น. - 18:00 น.</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Engineering Building, Pasadena</p>
+                        <p class="interested"><i class="fas fa-users"></i> 156 คนสนใจ</p>
+                        <p class="description">ค้นพบโครงการนักศึกษาและงานวิจัยที่ก้าวล้ำในสาขาวิศวกรรม การสาธิตเชิงโต้ตอบและช่วงถามตอบกับคณาจารย์</p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn">เข้าร่วมกิจกรรม</button>
+                        <i class="far fa-heart heart-icon"></i>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="tags">
+                            <span class="tag social">Social</span>
+                            <span class="tag university">Yale University</span>
+                        </div>
+                        <h3>การแสดงผลงานศิลปะและวัฒนธรรม</h3>
+                    </div>
+                    <div class="card-body">
+                        <p><i class="fas fa-calendar-alt"></i> 28 มีนาคม 2024</p>
+                        <p><i class="fas fa-clock"></i> 15:00 น. - 19:00 น.</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Art Center, New Haven</p>
+                        <p class="interested"><i class="fas fa-users"></i> 98 คนสนใจ</p>
+                        <p class="description">สัมผัสบรรยากาศศิลปะที่มีชีวิตชีวาที่เยลผ่านการแสดงนิทรรศการและเวิร์คช็อปเชิงโต้ตอบ</p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn">เข้าร่วมกิจกรรม</button>
+                        <i class="far fa-heart heart-icon"></i>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="tags">
+                            <span class="tag openhouse">OpenHouse</span>
+                            <span class="tag university">Wharton</span>
+                        </div>
+                        <h3>การบรรยายข้อมูลหลักสูตรบริหารธุรกิจ</h3>
+                    </div>
+                    <div class="card-body">
+                        <p><i class="fas fa-calendar-alt"></i> 2 เมษายน 2024</p>
+                        <p><i class="fas fa-clock"></i> 11:00 น. - 13:00 น.</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Business School, Philadelphia</p>
+                        <p class="interested"><i class="fas fa-users"></i> 173 คนสนใจ</p>
+                        <p class="description">เรียนรู้เกี่ยวกับหลักสูตรบริหารธุรกิจระดับปริญญาตรี ข้อกำหนดในการรับเข้าเรียน และโอกาสในการประกอบอาชีพในสาขาธุรกิจ</p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn">เข้าร่วมกิจกรรม</button>
+                        <i class="far fa-heart heart-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <%- include('partials/footer') %>
+</body>
+</html>
+<script>
+            </script>
+</script>
+</html>

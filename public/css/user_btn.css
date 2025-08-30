@@ -1,0 +1,41 @@
+/* Profile & Logout Button */
+.user-menu-inline {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+}
+
+.profile-btn {
+	background: #fff;
+	color: #4a90e2;
+	border: 1px solid #4a90e2;
+	padding: 0.6rem 1.4rem;
+	border-radius: 30px;
+	cursor: pointer;
+	font-weight: 600;
+	text-decoration: none;
+	margin-right: 10px;
+	transition: background 0.3s, color 0.3s, box-shadow 0.2s;
+}
+.profile-btn:hover {
+	background: #4a90e2;
+	color: #fff;
+	box-shadow: 0 0 12px rgba(74,144,226,0.3);
+}
+
+.logout-btn {
+	background: #fff;
+	color: #e57373;
+	border: 1px solid #e57373;
+	padding: 0.6rem 1.4rem;
+	border-radius: 30px;
+	cursor: pointer;
+	font-weight: 600;
+	text-decoration: none;
+	transition: background 0.3s, color 0.3s, box-shadow 0.2s;
+}
+.logout-btn:hover {
+	background: #e57373;
+	color: #fff;
+	box-shadow: 0 0 12px rgba(229,115,115,0.3);
+}

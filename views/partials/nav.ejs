@@ -1,0 +1,26 @@
+<header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-wrapper">
+                    <div class="logo">High School Herald</div>
+                    <ul class="nav-links">
+                        <li><a href="/">หน้าแรก</a></li>
+                        <li><a href="/events">กิจกรรม</a></li>
+                        <li><a href="/universities">มหาวิทยาลัย</a></li>
+                    </ul>
+
+                    <div class="nav-controls">
+                        <% if (user) { %>
+                            <%= console.log(user); %>
+                            <div class="user-menu-inline">
+                                <a href="/profile" class="profile-btn">โปรไฟล์</a>
+                                <a href="/auth/logout" class="logout-btn">ออกจากระบบ</a>
+                            </div>
+                        <% } else { %>
+                            <a href="/login" class="login-btn">เข้าสู่ระบบ</a>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>

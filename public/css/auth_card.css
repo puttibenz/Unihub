@@ -1,0 +1,151 @@
+/* Import Google Fonts - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* Basic Styles for body and container */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f6fb; /* Background color consistent with other pages */
+    color: #333;
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Auth Card Layout */
+/* .auth-card-container ไม่จำเป็นต้องมี justify-content: center เมื่อ card มี margin: auto */
+.auth-card-container {
+    width: 100%; /* ให้ container กินพื้นที่เต็ม */
+    /* display: flex;  สามารถลบออกได้หาก card มี margin: auto */
+    /* justify-content: center; */ /* สามารถลบออกได้หาก card มี margin: auto */
+}
+
+.auth-card {
+    background: #fff;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 450px; /* กำหนดความกว้างสูงสุด */
+    margin: 0 auto; /* **แก้ไขตรงนี้**: จัดการ์ดให้อยู่กึ่งกลางในแนวนอน */
+    text-align: center;
+}
+
+.auth-card-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #0066ff; /* Primary brand color */
+    margin-bottom: 5px;
+}
+
+.auth-card-subtitle {
+    font-size: 1rem;
+    color: #777;
+    margin-bottom: 30px;
+}
+
+/* Form Styles */
+.form-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: #333;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #0066ff;
+    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.15);
+}
+
+/* Button Styles */
+.btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-gradient {
+    background: linear-gradient(to right, #0066ff, #4a90e2);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
+}
+
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
+}
+
+/* Divider Styles */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 25px 0;
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+.auth-divider hr {
+    flex: 1;
+    border: none;
+    height: 1px;
+    background-color: #e0e0e0;
+}
+
+.auth-divider span {
+    padding: 0 10px;
+}
+
+/* Links */
+.auth-switch-link {
+    margin-top: 15px;
+    font-size: 0.95rem;
+    color: #777;
+}
+
+.auth-switch-link a {
+    color: #0066ff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.auth-switch-link a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 30px 20px;
+    }
+    .auth-card-title {
+        font-size: 1.8rem;
+    }
+}

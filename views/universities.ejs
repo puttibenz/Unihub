@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>มหาวิทยาลัยคู่ค้า</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/style_universities.css">
+    <link rel="stylesheet" href="/css/user_btn.css">
+</head>
+<body>
+    <%- include('partials/nav'); %>
+    
+    <section class="page-header">
+        <div class="container">
+            <div class="header-text">
+                <h1>มหาวิทยาลัยคู่ค้า</h1>
+                <p>สำรวจมหาวิทยาลัยชั้นนำและค้นพบกิจกรรมและโอกาสที่พวกเขามีให้กับนักเรียนมัธยมปลาย</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="search-filter-section">
+        <div class="container">
+            <div class="search-filter-wrapper">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="ค้นหามหาวิทยาลัย, สาขาวิชา, หรือโปรแกรม...">
+                </div>
+                <div class="results-info">
+                    <p>พบ 6 มหาวิทยาลัย</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="universities-grid-section">
+        <div class="container">
+            <div class="card-container">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Massachusetts Institute of Technology</h3>
+                        <div class="tags">
+                            <span class="tag university">MIT</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="location"><i class="fas fa-map-marker-alt"></i> Cambridge, Massachusetts</p>
+                        <p class="description">เป็นผู้นำด้านนวัตกรรมและเทคโนโลยี เป็นที่รู้จักในด้านงานวิจัยที่ล้ำสมัยและจิตวิญญาณของผู้ประกอบการ</p>
+                        <div class="info-row">
+                            <div class="info-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>6 กิจกรรม</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-users"></i>
+                                <span>1,273 ผู้ติดตาม</span>
+                            </div>
+                        </div>
+                        <div class="upcoming-events">
+                            <h4>กิจกรรมที่กำลังจะมาถึง</h4>
+                            <ul>
+                                <li>Computer Science Open House</li>
+                                <li>AI and Robotics Workshop</li>
+                                <li>High School Tech Competition</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#" class="btn-primary">ดูกิจกรรม</a>
+                        <a href="#" class="btn-secondary">เว็บไซต์</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Harvard University</h3>
+                        <div class="tags">
+                            <span class="tag university">Harvard</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="location"><i class="fas fa-map-marker-alt"></i> Cambridge, Massachusetts</p>
+                        <p class="description">มหาวิทยาลัยไอวีลีกอันทรงเกียรติ มีความเป็นเลิศทางวิชาการและมรดกอันยาวนาน</p>
+                        <div class="info-row">
+                            <div class="info-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>8 กิจกรรม</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-users"></i>
+                                <span>1,298 ผู้ติดตาม</span>
+                            </div>
+                        </div>
+                        <div class="upcoming-events">
+                            <h4>กิจกรรมที่กำลังจะมาถึง</h4>
+                            <ul>
+                                <li>Pre-Med Student Workshop</li>
+                                <li>College Admission Q&A</li>
+                                <li>Research Opportunities Session</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#" class="btn-primary">ดูกิจกรรม</a>
+                        <a href="#" class="btn-secondary">เว็บไซต์</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Stanford University</h3>
+                        <div class="tags">
+                            <span class="tag university">Stanford</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="location"><i class="fas fa-map-marker-alt"></i> Palo Alto, California</p>
+                        <p class="description">มหาวิทยาลัยวิจัยชั้นนำใน Silicon Valley ที่มีชื่อเสียงด้านโปรแกรมเทคโนโลยี ธุรกิจ และศิลปศาสตร์</p>
+                        <div class="info-row">
+                            <div class="info-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>6 กิจกรรม</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-users"></i>
+                                <span>1,294 ผู้ติดตาม</span>
+                            </div>
+                        </div>
+                        <div class="upcoming-events">
+                            <h4>กิจกรรมที่กำลังจะมาถึง</h4>
+                            <ul>
+                                <li>Spring Campus Festival</li>
+                                <li>Arts & Humanities Workshop</li>
+                                <li>Entrepreneurship Workshop</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#" class="btn-primary">ดูกิจกรรม</a>
+                        <a href="#" class="btn-secondary">เว็บไซต์</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>California Institute of Technology</h3>
+                        <div class="tags">
+                            <span class="tag university">Caltech</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="location"><i class="fas fa-map-marker-alt"></i> Pasadena, California</p>
+                        <p class="description">มีชื่อเสียงระดับโลกในด้านโปรแกรมวิทยาศาสตร์และวิศวกรรมศาสตร์</p>
+                        <div class="info-row">
+                            <div class="info-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>8 กิจกรรม</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-users"></i>
+                                <span>1,187 ผู้ติดตาม</span>
+                            </div>
+                        </div>
+                        <div class="upcoming-events">
+                            <h4>กิจกรรมที่กำลังจะมาถึง</h4>
+                            <ul>
+                                <li>Engineering Innovation Fair</li>
+                                <li>Physics and Astronomy Lab Visit</li>
+                                <li>Research Lab Tours</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#" class="btn-primary">ดูกิจกรรม</a>
+                        <a href="#" class="btn-secondary">เว็บไซต์</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Yale University</h3>
+                        <div class="tags">
+                            <span class="tag university">Yale</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="location"><i class="fas fa-map-marker-alt"></i> New Haven, Connecticut</p>
+                        <p class="description">มีชื่อเสียงด้านการศึกษาศิลปศาสตร์และวัฒนธรรมที่มีชีวิตชีวา</p>
+                        <div class="info-row">
+                            <div class="info-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>6 กิจกรรม</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-users"></i>
+                                <span>1,289 ผู้ติดตาม</span>
+                            </div>
+                        </div>
+                        <div class="upcoming-events">
+                            <h4>กิจกรรมที่กำลังจะมาถึง</h4>
+                            <ul>
+                                <li>Arts & Culture Showcase</li>
+                                <li>Admissions Information Session</li>
+                                <li>Campus Tour</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#" class="btn-primary">ดูกิจกรรม</a>
+                        <a href="#" class="btn-secondary">เว็บไซต์</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>University of Pennsylvania - Wharton</h3>
+                        <div class="tags">
+                            <span class="tag university">Wharton</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="location"><i class="fas fa-map-marker-alt"></i> Philadelphia, Pennsylvania</p>
+                        <p class="description">โรงเรียนธุรกิจชั้นนำที่มีชื่อเสียงระดับโลกและโปรแกรมบัณฑิตศึกษา</p>
+                        <div class="info-row">
+                            <div class="info-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>7 กิจกรรม</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-users"></i>
+                                <span>1,328 ผู้ติดตาม</span>
+                            </div>
+                        </div>
+                        <div class="upcoming-events">
+                            <h4>กิจกรรมที่กำลังจะมาถึง</h4>
+                            <ul>
+                                <li>Business School Info Session</li>
+                                <li>Entrepreneurship Showcase</li>
+                                <li>Finance Career Fair</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#" class="btn-primary">ดูกิจกรรม</a>
+                        <a href="#" class="btn-secondary">เว็บไซต์</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <%- include('partials/footer') %>
+
+</body>
+</html>
+<script>
+            </script>
+</script>
+</html>

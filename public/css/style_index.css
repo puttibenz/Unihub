@@ -1,0 +1,444 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f4f6fb;
+  color: #333;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Navbar */
+.navbar {
+  background: white;
+}
+.nav-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: space-between; /* ซ้าย-ขวา */
+  align-items: center;
+  padding: 1rem 2rem;
+  z-index: 1000;
+}
+
+.logo {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #0066ff;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex; 
+  justify-content: center;   /* เมนูกลาง */
+  gap: 1.5rem;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  transition: 0.3s;
+}
+
+.nav-links a:hover {
+  color: #0066ff;
+}
+
+.nav-links a.active {
+  font-weight: bold;
+  color: #0066ff;
+}
+
+.login-btn {
+    background-color: #fff;
+    color: #0066ff;
+    border: 1px solid #0066ff;
+    padding: 0.6rem 1.4rem;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login-btn:hover {
+  box-shadow: 0 0 12px rgba(0,102,255,0.6);
+}
+/*Nav*/
+
+/* Hero */
+.hero {
+  height: 500px;
+  width: 100%;
+  background: linear-gradient(135deg, #0066ff, #00ccff);
+  display: flex;
+  flex-direction: column;  /* จัดเรียงแนวตั้ง */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  color: white;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  animation: fadeIn 1.5s ease;
+}
+
+.hero span {
+  color: gold;
+}
+
+.hero p {
+  max-width: 600px;
+  margin: auto;
+  opacity: 0.9;
+}
+
+.hero-buttons {
+  margin-top: 2rem;
+}
+
+.hero-buttons .btn {
+  margin: 0 0.5rem;
+}
+
+/* Stats */
+.stats-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center; /* จัดกลาง */
+  gap: 2rem;
+  padding: 3rem 2rem;
+  flex-wrap: wrap;
+}
+
+.stat {
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: #f9f9ff;
+  transition: 0.3s;
+  width: 220px;
+}
+
+.stat:hover {
+  transform: translateY(-5px);
+  background: #eef5ff;
+}
+
+.stat h2 {
+  color: #0066ff;
+  font-size: 2rem;
+}
+/* End stat */
+
+/* featured */
+.featured {
+  padding: 80px 0;
+  text-align: center;
+
+  h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 40px;
+    font-weight: 400;
+  }
+}
+/* end featured */
+
+/* Cards */
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* ปรับขนาด card ให้ใกล้เคียงในรูป */
+    gap: 28px; /* เพิ่มระยะห่างระหว่าง card */
+    justify-content: center;
+    padding: 40px 0;
+}
+
+.card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: left; /* จัดข้อความใน card ให้อยู่ชิดซ้าย */
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08); /* ปรับ shadow ให้นุ่มนวลขึ้น */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    min-height: 380px; /* เพิ่มความสูงของ card */
+    position: relative;
+    overflow: hidden; /* ซ่อนส่วนเกิน */
+}
+
+.card:hover {
+    transform: translateY(-10px); /* ขยับขึ้นเมื่อ hover */
+    box-shadow: 0 16px 32px rgba(0,0,0,0.12); /* ปรับ shadow เมื่อ hover */
+}
+
+.card-header .tags {
+    margin-bottom: 15px;
+    display: flex; /* จัด tag ให้อยู่ในบรรทัดเดียวกัน */
+    gap: 8px; /* ระยะห่างระหว่าง tag */
+}
+
+.card-header .tag {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* สีสำหรับ tag */
+.tag.openhouse { background-color: #e0f7fa; color: #00bcd4; }
+.tag.academic { background-color: #e3f2fd; color: #2196f3; }
+.tag.social { background-color: #fff3e0; color: #ff9800; }
+.tag.university {
+    background-color: #f0f0f0;
+    color: #555;
+    font-weight: 500;
+    padding: 6px 12px; /* ปรับ padding ให้เท่ากับ tag อื่นๆ */
+}
+
+
+.card h3 {
+    font-size: 1.4rem; /* ขนาดใหญ่ขึ้นเล็กน้อย */
+    margin-bottom: 15px;
+    color: #333;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.card-body p {
+    font-size: 0.9rem;
+    color: #555;
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+}
+
+.card-body p i {
+    margin-right: 10px;
+    color: #888;
+    font-size: 1rem;
+}
+
+.card-body .interested {
+    font-weight: 600;
+    color: #4a90e2; /* สีเดียวกับปุ่ม */
+    margin-top: 15px;
+}
+
+.card-body .description {
+    font-size: 0.85rem;
+    color: #777;
+    margin-top: 15px;
+    line-height: 1.5;
+    flex-grow: 1; /* ทำให้ข้อความ description ขยายเต็มพื้นที่ */
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.card .btn {
+    padding: 12px 24px; /* ปรับขนาดปุ่ม */
+    border-radius: 10px; /* ปรับความโค้งของปุ่ม */
+    background: #4a90e2; /* สีปุ่มหลัก */
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    font-size: 1rem;
+    flex-grow: 1; /* ทำให้ปุ่มขยายเต็มพื้นที่ */
+    margin-right: 15px; /* ระยะห่างจากไอคอนหัวใจ */
+}
+
+.card .btn:hover {
+    background: #357abd;
+    transform: translateY(-2px);
+}
+
+.heart-icon {
+    font-size: 1.5rem;
+    color: #bbb;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.2s ease;
+    padding: 5px; /* เพิ่ม padding เพื่อให้กดง่ายขึ้น */
+}
+
+.heart-icon:hover {
+    color: #e57373; /* สีแดงเมื่อ hover */
+    transform: scale(1.1);
+}
+/*End card*/
+
+.btn-view-events {
+  display: inline-block;
+  align-items: center;
+  padding: 12px 28px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #ff6b6b, #f94d6a);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(249, 77, 106, 0.4);
+}
+
+.btn-view-events:hover {
+  background: linear-gradient(135deg, #f94d6a, #ff6b6b);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 18px rgba(249, 77, 106, 0.55);
+}
+
+.btn-view-events:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 3px 8px rgba(249, 77, 106, 0.4);
+}
+
+@media (max-width: 992px) {
+  .card-container {
+    grid-template-columns: repeat(2, 1fr); /* tablet */
+  }
+}
+
+@media (max-width: 600px) {
+  .card-container {
+    grid-template-columns: 1fr; /* mobile */
+  }
+}
+
+/* CTA */
+.cta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+  min-height: 320px;
+  background: linear-gradient(135deg,#0066ff,#00ccff);
+  color: white;
+
+}
+
+.start-btn {
+  display: inline-block;
+  align-items: center;
+  padding: 12px 28px;
+  margin-top: 20px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #ff6b6b, #f94d6a);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(249, 77, 106, 0.4);
+}
+
+.cta-container-wrapper {
+  text-align: center;
+  align-items: center;
+  padding: 40px 0;
+}
+
+.cta .start-btn:hover {
+  background: gold;
+  color: black;
+  transform: scale(1.1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(20px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+/* Animation Keyframes */
+.navbar {
+    animation: fadeIn 1s ease-in-out;
+}
+
+.card-container {
+    animation: slideUp 1.8s ease-out; /* ใช้ animation ที่ต่างออกไป */
+    animation-delay: 0.5s; /* หน่วงเวลาให้ card ปรากฏหลังองค์ประกอบอื่น */
+    animation-fill-mode: forwards; /* รักษา state สุดท้ายของ animation */
+}
+
+/* Optional: Individual card animation */
+.card {
+    opacity: 0; /* ซ่อน card ไว้ก่อน */
+    animation: slideUp 0.6s ease-out forwards;
+    animation-delay: var(--animation-delay); /* ใช้ CSS custom property */
+}
+
+/*footer*/
+.footer {
+    background-color: #f0f0f5;
+    padding: 25px 0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #777;
+    border-top: 1px solid #e0e0e0;
+}
+
+.footer a {
+    color: #4a90e2;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+/* End footer */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* Animation Keyframes */

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ</title>
+    <link rel="stylesheet" href="/css/auth_card.css">
+</head>
+<body>
+    <main class="auth-main-content">
+        <div class="auth-card-container">
+            <div class="auth-card">
+                <h2 class="auth-card-title">ยินดีต้อนรับกลับ</h2>
+                <p class="auth-card-subtitle">โปรดลงชื่อเข้าใช้เพื่อดำเนินการต่อ</p>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="email">อีเมล</label>
+                        <input type="email" id="email" name="email" placeholder="กรอกอีเมลของคุณ" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">รหัสผ่าน</label>
+                        <input type="password" id="password" name="password" placeholder="กรอกรหัสผ่านของคุณ" required>
+                    </div>
+                    <button type="submit" class="btn btn-gradient">เข้าสู่ระบบ</button>
+                </form>
+                <div class="auth-divider">
+                    <hr>
+                    <span>หรือ</span>
+                    <hr>
+                </div>
+                <p class="auth-switch-link">
+                    ยังไม่มีบัญชีใช่ไหม? <a href="/register">ลงทะเบียน</a>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                try {
+                    const res = await fetch('/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        alert('เข้าสู่ระบบสำเร็จ! จะนำคุณไปยังหน้าแรก');
+                        window.location.href = '/';
+                    } else {
+                        alert(data.message || 'เข้าสู่ระบบไม่สำเร็จ');
+                    }
+                } catch (err) {
+                    alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>

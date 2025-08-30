@@ -1,0 +1,71 @@
+<%- include('partials/head', { title: 'Admin CRUD' }) %>
+<body>
+<%- include('partials/nav') %>
+<div class="container">
+    <h1>Admin: จัดการกิจกรรมและมหาวิทยาลัย</h1>
+    <div class="crud-section">
+        <h2>จัดการกิจกรรม (Events)</h2>
+        <table class="crud-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ชื่อกิจกรรม</th>
+                    <th>วันที่</th>
+                    <th>สถานที่</th>
+                    <th>คำอธิบาย</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- ตัวอย่างข้อมูล สามารถดึงจาก backend ได้ -->
+                <tr>
+                    <td>1</td>
+                    <td>Open House 2025</td>
+                    <td>2025-09-01</td>
+                    <td>มหาวิทยาลัย A</td>
+                    <td>กิจกรรมแนะนำคณะ</td>
+                    <td>
+                        <button class="btn-edit">แก้ไข</button>
+                        <button class="btn-delete">ลบ</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn-add">เพิ่มกิจกรรม</button>
+    </div>
+    <div class="crud-section">
+        <h2>จัดการมหาวิทยาลัย (Universities)</h2>
+        <table class="crud-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ชื่อมหาวิทยาลัย</th>
+                    <th>ที่ตั้ง</th>
+                    <th>เว็บไซต์</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- ตัวอย่างข้อมูล สามารถดึงจาก backend ได้ -->
+                <tr>
+                    <td>1</td>
+                    <td>มหาวิทยาลัย A</td>
+                    <td>กรุงเทพฯ</td>
+                    <td>www.unia.ac.th</td>
+                    <td>
+                        <button class="btn-edit">แก้ไข</button>
+                        <button class="btn-delete">ลบ</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn-add">เพิ่มมหาวิทยาลัย</button>
+    </div>
+</div>
+<%- include('partials/footer') %>
+</body>
+</html>
+<script>
+            </script>
+</script>
+</html>
