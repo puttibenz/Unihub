@@ -14,9 +14,7 @@
                         <% if (user) { %>
                             <div class="user-menu-inline">
                                 <% /* prefer email-based admin check, fallback to role */ %>
-                                <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
-                                    <a href="/crud" class="profile-btn">จัดการระบบ</a>
-                                <% } else if (user.email && Array.isArray(adminEmails) && adminEmails.includes(user.email)) { %>
+                                <% if (user.email && Array.isArray(adminEmails) && adminEmails.includes(user.email)) { %>
                                     <a href="/crud" class="profile-btn">จัดการระบบ</a>
                                 <% } else { %>
                                     <a href="/profile" class="profile-btn">โปรไฟล์</a>

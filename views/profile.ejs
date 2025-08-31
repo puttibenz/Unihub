@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="/css/style_profile.css">
     <link rel="stylesheet" href="/css/user_btn.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    <link rel="stylesheet" href="/css/footer.css">
 
 </head>
 <body>
@@ -16,7 +18,7 @@
         <div class="container">
             <section class="profile-info-section card">
                 <div class="profile-header">
-                    <h2 class="profile-name"><%= `${user.name} ${user.lastname}` %></h2>
+                    <h2 class="profile-name"><%= `${user.first_name} ${user.last_name}` %></h2>
                     <p class="profile-role">นักเรียน</p>
                 </div>
                 <div class="profile-details">
@@ -26,7 +28,7 @@
                     </div>
                     <div class="detail-item">
                         <i class="fas fa-university"></i>
-                        <p><%= user.school %></p>
+                        <p><%= user.school_name %></p>
                     </div>
                     <div class="detail-item">
                         <i class="fas fa-calendar-alt"></i>

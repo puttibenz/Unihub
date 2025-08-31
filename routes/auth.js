@@ -16,7 +16,7 @@ router.post('/register', async (req, res) => {
     try {
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(password, salt);
-        const sql = 'INSERT INTO users (Name, Lastname, School, Email, Password) VALUES (?, ?, ?, ?, ?)';
+        const sql = 'INSERT INTO users (first_name, last_name, school_name , email , password) VALUES (?, ?, ?, ?, ?)';
         db.query(sql, [name, lastname, school, email, hash], (err, result) => {
             if (err) {
                 if (err.code === 'ER_DUP_ENTRY') {
@@ -48,16 +48,16 @@ router.post('/login', (req, res) => {
             return res.status(401).json({ message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
         }
         const user = results[0];
-        const match = await bcrypt.compare(password, user.Password);
+        const match = await bcrypt.compare(password, user.password);
         if (!match) {
             return res.status(401).json({ message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
         }
         req.session.user = {
             id: user.UserID,
-            name: user.Name,
-            lastname: user.LastName,
-            school: user.School,
-            email: user.Email,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            school_name: user.school_name,
+            email: user.email,
         };
         return res.status(200).json({ message: 'เข้าสู่ระบบสำเร็จ' });
     });

@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f4f6fb;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+h1, h2 {
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #2d3a4b;
+}
+
+.crud-section {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(44,62,80,0.08);
+    padding: 32px 24px;
+    margin-bottom: 32px;
+}
+
+.crud-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #f9fbfd;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(44,62,80,0.06);
+}
+.crud-table th, .crud-table td {
+    padding: 14px 16px;
+    text-align: left;
+}
+.crud-table th {
+    background: #e3eafc;
+    color: #2d3a4b;
+    font-weight: 500;
+    border-bottom: 2px solid #d1d9e6;
+}
+.crud-table tr:nth-child(even) {
+    background: #f4f6fb;
+}
+.crud-table tr:hover {
+    background: #eaf1fb;
+}
+
+.btn-add, .btn-edit, .btn-delete {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.btn-add {
+    background: #4f8cff;
+    color: #fff;
+    margin-top: 10px;
+}
+.btn-add:hover {
+    background: #2563eb;
+}
+.btn-edit {
+    background: #ffd93b;
+    color: #2d3a4b;
+    margin-right: 8px;
+}
+.btn-edit:hover {
+    background: #fbbf24;
+}
+.btn-delete {
+    background: #ff6b6b;
+    color: #fff;
+}
+.btn-delete:hover {
+    background: #e53e3e;
+}
