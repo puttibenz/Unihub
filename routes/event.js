@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
         { tag: 'OpenHouse', university: 'Wharton', title: 'การบรรยายข้อมูลหลักสูตรบริหารธุรกิจ', date: '2024-04-02', time: '11:00 - 13:00', location: 'Business School, Philadelphia', interested: 173, description: 'เรียนรู้เกี่ยวกับหลักสูตรบริหารธุรกิจระดับปริญญาตรี และโอกาสในการประกอบอาชีพ' }
     ];
 
-    res.render('events', { title: 'Events', events: sampleEvents });
+    res.render('event', { title: 'Event', events: sampleEvents });
 });
 
 module.exports = router;

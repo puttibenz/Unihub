@@ -42,7 +42,7 @@ app.get('/', (req,res) => {
 });
 
 app.use('/auth', authRoutes);
-app.use('/events', eventRoutes);
+app.use('/event', eventRoutes);
 app.use('/universities', universitiesRoutes);
 app.use('/profile', profileRoutes);
 app.use('/announcement', announcementRoutes);
