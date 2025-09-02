@@ -4,12 +4,15 @@ const session = require('express-session')
 const bodyParser = require('body-parser')
 const app = express()
 const path = require('path');
+
+const indexRoutes = require('./routes/index');
 const authRoutes = require('./routes/auth');
 const eventRoutes = require('./routes/event');
 const universitiesRoutes = require('./routes/universities');
 const profileRoutes = require('./routes/profile');
 const announcementRoutes = require('./routes/announcement');
 const crudRoutes = require('./routes/crud');    
+
 const db = require('./db'); // นำเข้าโมดูล db.js
 
 // Configure admin emails (comma-separated) via environment variable
@@ -37,10 +40,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/', (req,res) => {
-    res.render('index', {title:'Index'});
-});
-
+app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
 app.use('/event', eventRoutes);
 app.use('/universities', universitiesRoutes);
