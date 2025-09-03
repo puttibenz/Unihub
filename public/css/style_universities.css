@@ -111,80 +111,7 @@ body {
 
 /* --- ส่วนตารางมหาวิทยาลัย --- */
 .universities-grid-section {
-    padding: 20px 0 80px 0;
-}
-
-.card-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); /* ปรับขนาด card ให้ใกล้เคียงในรูป */
-    gap: 28px;
-    justify-content: center;
-}
-
-.card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    text-align: left;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    min-height: 380px;
-    position: relative;
-    overflow: hidden;
-}
-
-.card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 16px 32px rgba(0,0,0,0.12);
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.card-header h3 {
-    font-size: 1.4rem;
-    color: #333;
-    font-weight: 600;
-}
-
-.card-header .tags {
-    margin-left: 15px;
-}
-
-.card-header .tag {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background-color: #e0f0ff;
-    color: #0066ff;
-}
-
-.card-body .location {
-    font-size: 0.9rem;
-    color: #555;
-    margin: 5px 0;
-}
-
-.card-body .location i {
-    margin-right: 8px;
-    color: #888;
-}
-
-.card-body .description {
-    font-size: 0.95rem;
-    color: #666;
-    margin-top: 15px;
-    line-height: 1.5;
-    flex-grow: 1;
+    padding: 40px 0 40px 0;
 }
 
 .info-row {
@@ -320,11 +247,6 @@ body {
 }
 
 /* Optional: Individual card animation */
-.card {
-    opacity: 0; /* ซ่อน card ไว้ก่อน */
-    animation: slideUp 0.6s ease-out forwards;
-    animation-delay: var(--animation-delay); /* ใช้ CSS custom property */
-}
 
 @keyframes fadeIn {
     from {
