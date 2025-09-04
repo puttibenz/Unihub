@@ -42,23 +42,29 @@ router.post('/login', (req, res) => {
     if (!email || !password) {
         return res.status(400).json({ message: 'กรอกข้อมูลให้ครบถ้วน' });
     }
-    const sql = 'SELECT * FROM users WHERE email = ?';
+    const sql = 'SELECT * FROM users WHERE Email = ?';
     db.query(sql, [email], async (err, results) => {
         if (err) return res.status(500).json({ message: 'เกิดข้อผิดพลาด', error: err });
         if (results.length === 0) {
             return res.status(401).json({ message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
         }
         const user = results[0];
-        const match = await bcrypt.compare(password, user.password);
+        // ป้องกันกรณี field ชื่อไม่ตรง (เช่นใช้ Password ไม่ใช่ password)
+        const hashed = user.Password || user.password;
+        if (!hashed) {
+            console.error('Missing hashed password field on user row:', user);
+            return res.status(500).json({ message: 'ข้อมูลผู้ใช้ไม่สมบูรณ์ (ไม่มีรหัสผ่าน)' });
+        }
+        const match = await bcrypt.compare(password, hashed);
         if (!match) {
             return res.status(401).json({ message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
         }
         req.session.user = {
             id: user.UserID,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            school_name: user.school_name,
-            email: user.email,
+            first_name: user.First_Name,
+            last_name: user.Last_Name,
+            school_name: user.School_name,
+            email: user.Email,
         };
         return res.status(200).json({ message: 'เข้าสู่ระบบสำเร็จ' });
     });

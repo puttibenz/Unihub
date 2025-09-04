@@ -18,17 +18,17 @@
         <div class="container">
             <section class="profile-info-section card">
                 <div class="profile-header">
-                    <h2 class="profile-name"><%= `${user.first_name} ${user.last_name}` %></h2>
+                    <h2 class="profile-name"><%= [(user && user.first_name) || '', (user && user.last_name) || ''].join(' ').trim() || 'ไม่พบชื่อผู้ใช้' %></h2>
                     <p class="profile-role">นักเรียน</p>
                 </div>
                 <div class="profile-details">
                     <div class="detail-item">
                         <i class="fas fa-envelope"></i>
-                        <p><%= user.email %></p>
+                        <p><%= (user && user.email) || '-' %></p>
                     </div>
                     <div class="detail-item">
                         <i class="fas fa-university"></i>
-                        <p><%= user.school_name %></p>
+                        <p><%= (user && user.school_name) || '-' %></p>
                     </div>
                     <div class="detail-item">
                         <i class="fas fa-calendar-alt"></i>
