@@ -28,13 +28,40 @@
         </div>
     </section>
 
-    <section class="stats">
+    <section class="announcements">
         <div class="container">
-            <div class="stats-wrapper">
-                <div class="stat"><h2>50+</h2><p>กิจกรรมที่เปิดอยู่</p></div>
-                <div class="stat"><h2>10K+</h2><p>นักเรียนที่เข้าร่วม</p></div>
-                <div class="stat"><h2>25+</h2><p>มหาวิทยาลัยพันธมิตร</p></div>
-                <div class="stat"><h2>95%</h2><p>อัตราความสำเร็จ</p></div>
+            <div class="featured-wrapper">
+                <h1>ประกาศล่าสุด</h1>
+                <h3>ข่าวสาร ทุนการศึกษา และการรับสมัครจากมหาวิทยาลัย</h3>
+                <div class="card-container">
+                    <% const annSample = (typeof announcements !== 'undefined' && announcements) ? announcements : [
+                        {university:'จุฬาลงกรณ์มหาวิทยาลัย', tag:'รับสมัคร', title:'เปิดรับสมัครทุนการศึกษา ประจำปี 2026', deadline:'15 มกราคม 2026',  description:'ทุนสำหรับนักเรียนที่มีผลการเรียนดีและมีความเด่นทางกิจกรรม'} ,
+                        {university:'มหาวิทยาลัยมหิดล', tag:'ประกาศ', title:'ประกาศผลการสอบสัมภาษณ์ รอบโควตา', deadline:'28 กุมภาพันธ์ 2026',  description:'ดูรายชื่อและขั้นตอนการยืนยันสิทธิ์ที่เว็บไซต์ของคณะ'},
+                        {university:'มหาวิทยาลัยธรรมศาสตร์', tag:'ข่าว', title:'ประชาสัมพันธ์โครงการแลกเปลี่ยนต่างประเทศ', deadline:'10 มีนาคม 2026',  description:'โอกาสไปแลกเปลี่ยน 1 เทอม สำหรับนักศึกษาที่สมัครและผ่านการคัดเลือก'}
+                    ]; %>
+
+                    <% annSample.forEach(function(a){ %>
+                    <article class="card">
+                        <div class="card-header">
+                            <div class="tags">
+                                <span class="tag university"><%= a.university %></span>
+                                <span class="tag"><%= a.tag %></span>
+                            </div>
+                            <h3><%= a.title %></h3>
+                        </div>
+                        <div class="card-body">
+                            <p><i class="fas fa-calendar-alt"></i> วันปิดรับสมัคร / วันที่สำคัญ: <strong><%= a.deadline %></strong></p>
+                            <p class="description"><%= a.description %></p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="/announcement" class="btn">ดูเพิ่มเติม</a>
+                            <div class="heart-icon">❤</div>
+                        </div>
+                    </article>
+                    <% }) %>
+
+                </div>
+                <a href="/announcement" class="btn-view-events">ดูประกาศทั้งหมด <i class="fas fa-arrow-right"></i></a>
             </div>
         </div>
     </section>

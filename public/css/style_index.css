@@ -136,6 +136,44 @@ body {
 }
 /* end featured */
 
+/* Announcements section (replaces previous stats section) */
+.announcements {
+  padding: 40px 0;
+  background: linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
+  color: #222;
+}
+
+.announcements .featured-wrapper {
+  text-align: center;
+  padding: 10px 0 0 0;
+}
+
+.announcements h1 {
+  font-size: 2rem;
+  color: #0b5bd7;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.announcements h3 {
+  font-size: 1rem;
+  color: #556;
+  margin-bottom: 22px;
+  font-weight: 400;
+}
+
+.announcements .card-container {
+  padding: 10px 0 30px 0; /* slightly tighter than events */
+  gap: 20px;
+}
+
+/* small screens: make announcements headings centered */
+@media (max-width: 600px) {
+  .announcements .featured-wrapper {
+    text-align: center;
+  }
+}
+
 .btn-view-events {
   display: inline-block;
   align-items: center;
