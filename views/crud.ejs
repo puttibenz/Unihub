@@ -88,21 +88,22 @@
 
             <table class="admin-table">
                 <thead>
-                    <tr><th>Name</th><th>Faculty</th><th>Actions</th></tr>
+                    <tr><th>Name</th><th>Faculty</th><th>University</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                     <% const depSample = (typeof departments !== 'undefined' && departments) ? departments : [
-                            {name:'Software Engineering', faculty:'Computer Science'},
-                            {name:'Marketing', faculty:'Business Administration'}
+                            {name:'Software Engineering', faculty:'Computer Science',university:'มหาวิทยาลัย A'},
+                            {name:'Marketing', faculty:'Business Administration', university:'มหาวิทยาลัย A'}
                         ]; %>
                     <% depSample.forEach(function(d, idx){ %>
                         <tr>
                             <td><%= d.name || d.DepartmentName || 'Unknown' %></td>
                             <td><%= d.faculty || d.Faculty || '-' %></td>
-                                            <td class="actions">
-                                            <button class="icon-btn" data-id="<%= d.id != null ? d.id : idx %>" onclick="onEdit('department', this.dataset.id)">✎</button>
-                                            <button class="icon-btn" data-id="<%= d.id != null ? d.id : idx %>" onclick="onDelete('department', this.dataset.id)">🗑</button>
-                                        </td>
+                            <td><%= d.university || d.University || '-' %></td>
+                            <td class="actions">
+                            <button class="icon-btn" data-id="<%= d.id != null ? d.id : idx %>" onclick="onEdit('department', this.dataset.id)">✎</button>
+                            <button class="icon-btn" data-id="<%= d.id != null ? d.id : idx %>" onclick="onDelete('department', this.dataset.id)">🗑</button>
+                            </td>
                         </tr>
                     <% }) %>
                 </tbody>
@@ -137,38 +138,198 @@
 
     </div>
 
+        <!-- Modal UI (client-only) -->
+        <div id="add-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1200;"> 
+            <div style="width:640px;max-width:95%;margin:48px auto;background:#fff;border-radius:8px;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,0.15);">
+                <h3 id="add-modal-title">Add</h3>
+                <form id="add-modal-form">
+                    <!-- University -->
+                    <div id="form-university" style="display:none">
+                        <label style="display:block;font-size:13px;margin-top:8px">ชื่อมหาวิทยาลัย</label>
+                        <input id="uni-name" type="text" placeholder="ชื่อมหาวิทยาลัย" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px" />
+                        <label style="display:block;font-size:13px;margin-top:8px">ที่ตั้ง</label>
+                        <input id="uni-location" type="text" placeholder="เช่น กรุงเทพมหานคร" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px" />
+                        <label style="display:block;font-size:13px;margin-top:8px">เว็บไซต์</label>
+                        <input id="uni-website" type="url" placeholder="https://example.ac.th" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px" />
+                    </div>
+
+                    <!-- Faculty -->
+                    <div id="form-faculty" style="display:none">
+                        <label style="display:block;font-size:13px;margin-top:8px">มหาวิทยาลัย</label>
+                        <select id="fac-university" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px"></select>
+                        <label style="display:block;font-size:13px;margin-top:8px">ชื่อคณะ</label>
+                        <input id="fac-name" type="text" placeholder="ชื่อคณะ" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px" />
+                    </div>
+
+                    <!-- Department -->
+                    <div id="form-department" style="display:none">
+                        <label style="display:block;font-size:13px;margin-top:8px">มหาวิทยาลัย</label>
+                        <select id="dept-university" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px"></select>
+                        <label style="display:block;font-size:13px;margin-top:8px">คณะ</label>
+                        <select id="dept-faculty" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px"></select>
+                        <label style="display:block;font-size:13px;margin-top:8px">ชื่อสาขา</label>
+                        <input id="dept-name" type="text" placeholder="ชื่อสาขา" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px" />
+                    </div>
+
+                    <div style="text-align:right;margin-top:12px">
+                        <button type="button" id="add-modal-cancel" class="btn-primary" style="background:#eee;color:#111;border:0;padding:8px 12px;border-radius:4px">ยกเลิก</button>
+                        <button type="submit" class="btn-primary" style="margin-left:8px">บันทึก</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     <%- include('partials/footer') %>
 
-    <script>
-        // Simple tab switching
-        document.querySelectorAll('.tabs .tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
-                tab.classList.add('active');
-                const name = tab.dataset.tab;
-                document.querySelectorAll('section.panel').forEach(p=>p.style.display='none');
-                const panel = document.getElementById('panel-' + name);
-                if(panel) panel.style.display = '';
-            });
-        });
+    <!-- data container (JSON embedded safely in HTML attributes) -->
+    <div id="__DATA__container" style="display:none;"
+         data-universities='<%- JSON.stringify(typeof universities !== "undefined" ? universities : []) %>'
+         data-faculties='<%- JSON.stringify(typeof faculties !== "undefined" ? faculties : []) %>'></div>
 
-            function onAdd(type){
-            const name = prompt('Enter ' + type + ' name');
-            if(!name) return;
-            alert(type + ' "' + name + '" would be created (implement API call).');
-        }
-            function onEdit(type, id){
-                const parsedId = id ? id : null;
-                const name = prompt('Edit ' + type + ' name (id='+ parsedId +')');
-                if(name) alert('Save changes for ' + type + ' id='+ parsedId + ' (implement API call)');
-            }
-            function onDelete(type, id){
-                const parsedId = id ? id : null;
-                if(confirm('Delete ' + type + ' id=' + parsedId + '?')){
-                    alert('Deleted (implement API call)');
+    <script>
+        // parse embedded JSON from data container
+        const __DATA_CONTAINER = document.getElementById('__DATA__container');
+        const __UNIVERSITIES = JSON.parse(__DATA_CONTAINER?.getAttribute('data-universities') || '[]');
+        const __FACULTIES = JSON.parse(__DATA_CONTAINER?.getAttribute('data-faculties') || '[]');
+
+                // helper to populate a select with university options
+                function populateUniversitySelect(sel){
+                    sel.innerHTML = '<option value="">-- เลือกมหาวิทยาลัย --</option>';
+                    (window.__UNIVERSITIES || []).forEach(u => {
+                        const opt = document.createElement('option');
+                        opt.value = u.id ?? u.UniversityID ?? u.ID ?? u.id ?? '';
+                        opt.textContent = u.name ?? u.UniversityName ?? u.University ?? 'Unknown';
+                        sel.appendChild(opt);
+                    });
                 }
-            }
-    </script>
+
+                // populate faculty select filtered by university id
+                function populateFacultySelectForUniversity(sel, universityId){
+                    sel.innerHTML = '<option value="">-- เลือกคณะ --</option>';
+                    const facs = window.__FACULTIES || [];
+                    facs.forEach(f => {
+                        const fUniId = f.universityId ?? f.UniversityID ?? f.UniversityId ?? f.university ?? f.University ?? '';
+                        const fName = f.name ?? f.FacultyName ?? f.Faculty ?? 'Unknown';
+                        const include = (!universityId) || String(fUniId) === String(universityId) || String(fUniId) === String((window.__UNIVERSITIES.find(u=>String(u.name||u.University||u.UniversityName)===String(universityId))||{}).id);
+                        if(include){
+                            const opt = document.createElement('option');
+                            opt.value = f.id ?? f.FacultyID ?? f.ID ?? '';
+                            opt.textContent = fName;
+                            sel.appendChild(opt);
+                        }
+                    });
+                }
+
+                // Simple tab switching
+                document.querySelectorAll('.tabs .tab').forEach(tab => {
+                        tab.addEventListener('click', () => {
+                                document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+                                tab.classList.add('active');
+                                const name = tab.dataset.tab;
+                                document.querySelectorAll('section.panel').forEach(p=>p.style.display='none');
+                                const panel = document.getElementById('panel-' + name);
+                                if(panel) panel.style.display = '';
+                        });
+                });
+
+                // Modal helpers (client-only UI)
+                const addModal = document.getElementById('add-modal');
+                const addModalTitle = document.getElementById('add-modal-title');
+                const addModalForm = document.getElementById('add-modal-form');
+                const addModalCancel = document.getElementById('add-modal-cancel');
+                const formUniversity = document.getElementById('form-university');
+                const formFaculty = document.getElementById('form-faculty');
+                const formDepartment = document.getElementById('form-department');
+                const uniNameInput = document.getElementById('uni-name');
+                const uniLocationInput = document.getElementById('uni-location');
+                const uniWebsiteInput = document.getElementById('uni-website');
+                const facUniversitySelect = document.getElementById('fac-university');
+                const facNameInput = document.getElementById('fac-name');
+                const deptUniversitySelect = document.getElementById('dept-university');
+                const deptFacultySelect = document.getElementById('dept-faculty');
+                const deptNameInput = document.getElementById('dept-name');
+
+                // initialize selects from embedded data
+                populateUniversitySelect(facUniversitySelect);
+                populateUniversitySelect(deptUniversitySelect);
+                populateFacultySelectForUniversity(deptFacultySelect, '');
+
+                function onAdd(type){
+                        // show modal with contextual title and reveal proper form
+                        addModal.dataset.type = type;
+                        addModalTitle.textContent = (type === 'university') ? 'เพิ่มมหาวิทยาลัย' : (type === 'faculty') ? 'เพิ่มคณะ' : (type === 'department') ? 'เพิ่มสาขา' : 'Add';
+                        // hide all forms
+                        formUniversity.style.display = 'none';
+                        formFaculty.style.display = 'none';
+                        formDepartment.style.display = 'none';
+                        // show the right one
+                        if(type === 'university'){
+                            formUniversity.style.display = '';
+                        } else if(type === 'faculty'){
+                            formFaculty.style.display = '';
+                        } else if(type === 'department'){
+                            formDepartment.style.display = '';
+                        }
+                        // reset inputs
+                        uniNameInput.value = '';
+                        uniLocationInput.value = '';
+                        uniWebsiteInput.value = '';
+                        facNameInput.value = '';
+                        deptNameInput.value = '';
+                        addModal.style.display = 'block';
+                        setTimeout(()=>{
+                            const first = addModal.querySelector('input, select');
+                            if(first) first.focus();
+                        }, 60);
+                }
+
+                function closeAddModal(){ addModal.style.display = 'none'; addModal.dataset.type = ''; }
+
+                addModalCancel.addEventListener('click', ()=> closeAddModal());
+
+                // when dept university changes, repopulate faculty select
+                deptUniversitySelect.addEventListener('change', (e)=>{
+                        populateFacultySelectForUniversity(deptFacultySelect, e.target.value);
+                });
+
+                addModalForm.addEventListener('submit', (e)=>{
+                        e.preventDefault();
+                        const type = addModal.dataset.type || 'item';
+                        if(type === 'university'){
+                            const payload = { name: uniNameInput.value.trim(), location: uniLocationInput.value.trim(), website: uniWebsiteInput.value.trim() };
+                            if(!payload.name) return alert('กรุณากรอกชื่อมหาวิทยาลัย');
+                            console.log('Add University (UI only):', payload);
+                            alert('เพิ่มมหาวิทยาลัย: ' + payload.name);
+                        } else if(type === 'faculty'){
+                            const payload = { universityId: facUniversitySelect.value, name: facNameInput.value.trim() };
+                            if(!payload.universityId || !payload.name) return alert('กรุณาเลือกมหาวิทยาลัยและกรอกชื่อคณะ');
+                            console.log('Add Faculty (UI only):', payload);
+                            alert('เพิ่มคณะ: ' + payload.name);
+                        } else if(type === 'department'){
+                            const payload = { universityId: deptUniversitySelect.value, facultyId: deptFacultySelect.value, name: deptNameInput.value.trim() };
+                            if(!payload.universityId || !payload.facultyId || !payload.name) return alert('กรุณากรอกข้อมูลให้ครบ');
+                            console.log('Add Department (UI only):', payload);
+                            alert('เพิ่มสาขา: ' + payload.name);
+                        } else {
+                            const name = (document.getElementById('add-modal-name') || {}).value || '';
+                            console.log('Add generic (UI only):', { type, name });
+                        }
+                        closeAddModal();
+                });
+
+                // keep existing edit/delete placeholders
+                function onEdit(type, id){
+                        const parsedId = id ? id : null;
+                        const name = prompt('Edit ' + type + ' name (id='+ parsedId +')');
+                        if(name) alert('Save changes for ' + type + ' id='+ parsedId + ' (implement API call)');
+                }
+                function onDelete(type, id){
+                        const parsedId = id ? id : null;
+                        if(confirm('Delete ' + type + ' id=' + parsedId + '?')){
+                                alert('Deleted (implement API call)');
+                        }
+                }
+        </script>
 </body>
 </html>
 

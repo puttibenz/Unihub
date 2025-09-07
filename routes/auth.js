@@ -60,7 +60,7 @@ router.post('/login', (req, res) => {
             return res.status(401).json({ message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
         }
         req.session.user = {
-            id: user.UserID,
+            id: user.ID,
             first_name: user.first_name,
             last_name: user.last_name,
             school_name: user.school_name,
