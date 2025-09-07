@@ -1,11 +1,16 @@
 /* --- Footer --- */
 .footer {
     background-color: #f0f0f5;
-    padding: 25px 0;
+    padding: 18px 0;
     text-align: center;
     font-size: 0.9rem;
     color: #777;
     border-top: 1px solid #e0e0e0;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
 }
 
 .footer a {
@@ -16,5 +21,9 @@
 
 .footer a:hover {
     text-decoration: underline;
+}
+/* ensure main content isn't hidden behind the fixed footer */
+body {
+    padding-bottom: 70px; /* adjust if footer height changes */
 }
 /* End Footer */

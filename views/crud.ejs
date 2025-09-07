@@ -1,85 +1,175 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRUD</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin Dashboard</title>
     <link rel="stylesheet" href="/css/style_crud.css">
     <link rel="stylesheet" href="/css/user_btn.css">
     <link rel="stylesheet" href="/css/nav.css">
     <link rel="stylesheet" href="/css/footer.css">
 </head>
 <body>
-    <body>
-<%- include('partials/nav') %>
-<div class="container">
-    <h1>Admin: จัดการกิจกรรมและมหาวิทยาลัย</h1>
-    <div class="crud-section">
-        <h2>จัดการกิจกรรม (Events)</h2>
-        <table class="crud-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>ชื่อกิจกรรม</th>
-                    <th>วันที่</th>
-                    <th>สถานที่</th>
-                    <th>คำอธิบาย</th>
-                    <th>Action</th>
-                </tr> 
-            </thead>
-            <tbody>
-                <!-- ตัวอย่างข้อมูล สามารถดึงจาก backend ได้ -->
-                <tr>
-                    <td>1</td>
-                    <td>Open House 2025</td>
-                    <td>2025-09-01</td>
-                    <td>มหาวิทยาลัย A</td>
-                    <td>กิจกรรมแนะนำคณะ</td>
-                    <td>
-                        <button class="btn-edit">แก้ไข</button>
-                        <button class="btn-delete">ลบ</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <button class="btn-add">เพิ่มกิจกรรม</button>
+    <%- include('partials/nav') %>
+
+    <div class="container">
+        <header class="admin-header">
+            <h1>Admin Dashboard</h1>
+            <p class="muted">Manage universities, faculties, departments, and events</p>
+        </header>
+
+        <div class="tabs" role="tablist">
+            <div class="tab" data-tab="universities">Universities</div>
+            <div class="tab" data-tab="faculties">Faculties</div>
+            <div class="tab active" data-tab="departments">Departments</div>
+            <div class="tab" data-tab="events">Events</div>
+        </div>
+
+        <section class="panel" id="panel-universities" style="display:none;">
+            <div class="panel-header">
+                <div>
+                    <h3>Universities</h3>
+                    <p class="muted">Manage university information</p>
+                </div>
+                <button class="btn-primary" onclick="onAdd('university')">+ Add University</button>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr><th>Name</th><th>Location</th><th>Website</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    <% const uniSample = (typeof universities !== 'undefined' && universities) ? universities : [{name:'มหาวิทยาลัย A', location:'กรุงเทพฯ', website:'www.unia.ac.th'}]; %>
+                    <% uniSample.forEach(function(u){ %>
+                        <tr>
+                            <td><%= u.name || u.UniversityName || 'Unknown' %></td>
+                            <td><%= u.location || u.Location || '-' %></td>
+                            <td><%= u.website || u.Website || '-' %></td>
+                              <td class="actions"><button class="icon-btn" data-id="<%= u.id || '' %>" onclick="onEdit('university', this.dataset.id)">✎</button><button class="icon-btn" data-id="<%= u.id || '' %>" onclick="onDelete('university', this.dataset.id)">🗑</button></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="panel" id="panel-faculties" style="display:none;">
+            <div class="panel-header">
+                <div>
+                    <h3>Faculties</h3>
+                    <p class="muted">Manage faculty information</p>
+                </div>
+                <button class="btn-primary" onclick="onAdd('faculty')">+ Add Faculty</button>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr><th>Name</th><th>University</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    <% const facSample = (typeof faculties !== 'undefined' && faculties) ? faculties : [{name:'Computer Science', university:'มหาวิทยาลัย A'}]; %>
+                    <% facSample.forEach(function(f){ %>
+                        <tr>
+                            <td><%= f.name || f.FacultyName || 'Unknown' %></td>
+                            <td><%= f.university || f.University || '-' %></td>
+                              <td class="actions"><button class="icon-btn" data-id="<%= f.id || '' %>" onclick="onEdit('faculty', this.dataset.id)">✎</button><button class="icon-btn" data-id="<%= f.id || '' %>" onclick="onDelete('faculty', this.dataset.id)">🗑</button></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="panel" id="panel-departments">
+            <div class="panel-header">
+                <div>
+                    <h3>Departments</h3>
+                    <p class="muted">Manage department information</p>
+                </div>
+                <button class="btn-primary" onclick="onAdd('department')">+ Add Department</button>
+            </div>
+
+            <table class="admin-table">
+                <thead>
+                    <tr><th>Name</th><th>Faculty</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    <% const depSample = (typeof departments !== 'undefined' && departments) ? departments : [
+                            {name:'Software Engineering', faculty:'Computer Science'},
+                            {name:'Marketing', faculty:'Business Administration'}
+                        ]; %>
+                    <% depSample.forEach(function(d, idx){ %>
+                        <tr>
+                            <td><%= d.name || d.DepartmentName || 'Unknown' %></td>
+                            <td><%= d.faculty || d.Faculty || '-' %></td>
+                                            <td class="actions">
+                                            <button class="icon-btn" data-id="<%= d.id != null ? d.id : idx %>" onclick="onEdit('department', this.dataset.id)">✎</button>
+                                            <button class="icon-btn" data-id="<%= d.id != null ? d.id : idx %>" onclick="onDelete('department', this.dataset.id)">🗑</button>
+                                        </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="panel" id="panel-events" style="display:none;">
+            <div class="panel-header">
+                <div>
+                    <h3>Events</h3>
+                    <p class="muted">Manage events</p>
+                </div>
+                <button class="btn-primary" onclick="onAdd('event')">+ Add Event</button>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr><th>Title</th><th>Date</th><th>Location</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    <% const evSample = (typeof events !== 'undefined' && events) ? events : [{title:'Open House 2025', date:'2025-09-01', location:'มหาวิทยาลัย A'}]; %>
+                    <% evSample.forEach(function(e){ %>
+                        <tr>
+                            <td><%= e.title || e.Title || 'Untitled' %></td>
+                            <td><%= e.date || '-' %></td>
+                            <td><%= e.location || '-' %></td>
+                              <td class="actions"><button class="icon-btn" data-id="<%= e.id || '' %>" onclick="onEdit('event', this.dataset.id)">✎</button><button class="icon-btn" data-id="<%= e.id || '' %>" onclick="onDelete('event', this.dataset.id)">🗑</button></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </section>
+
     </div>
-    <div class="crud-section">
-        <h2>จัดการมหาวิทยาลัย (Universities)</h2>
-        <table class="crud-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>ชื่อมหาวิทยาลัย</th>
-                    <th>ที่ตั้ง</th>
-                    <th>เว็บไซต์</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- ตัวอย่างข้อมูล สามารถดึงจาก backend ได้ -->
-                <tr>
-                    <td>1</td>
-                    <td>มหาวิทยาลัย A</td>
-                    <td>กรุงเทพฯ</td>
-                    <td>www.unia.ac.th</td>
-                    <td>
-                        <button class="btn-edit">แก้ไข</button>
-                        <button class="btn-delete">ลบ</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <button class="btn-add">เพิ่มมหาวิทยาลัย</button>
-    </div>
-</div>
-<%- include('partials/footer') %>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        // Simple tab switching
+        document.querySelectorAll('.tabs .tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+                tab.classList.add('active');
+                const name = tab.dataset.tab;
+                document.querySelectorAll('section.panel').forEach(p=>p.style.display='none');
+                const panel = document.getElementById('panel-' + name);
+                if(panel) panel.style.display = '';
+            });
+        });
+
+            function onAdd(type){
+            const name = prompt('Enter ' + type + ' name');
+            if(!name) return;
+            alert(type + ' "' + name + '" would be created (implement API call).');
+        }
+            function onEdit(type, id){
+                const parsedId = id ? id : null;
+                const name = prompt('Edit ' + type + ' name (id='+ parsedId +')');
+                if(name) alert('Save changes for ' + type + ' id='+ parsedId + ' (implement API call)');
+            }
+            function onDelete(type, id){
+                const parsedId = id ? id : null;
+                if(confirm('Delete ' + type + ' id=' + parsedId + '?')){
+                    alert('Deleted (implement API call)');
+                }
+            }
+    </script>
 </body>
 </html>
-<script>
-            </script>
-</script>
-</html>
-</body>
-</html>
+
 

@@ -15,7 +15,7 @@
                             <div class="user-menu-inline">
                                 <% /* prefer email-based admin check, fallback to role */ %>
                                 <% if (user.email && Array.isArray(adminEmails) && adminEmails.includes(user.email)) { %>
-                                    <a href="/crud" class="profile-btn">จัดการระบบ</a>
+                                    <a href="/admin" class="profile-btn">จัดการระบบ</a>
                                 <% } else { %>
                                     <a href="/profile" class="profile-btn">โปรไฟล์</a>
                                 <% } %>

@@ -4,7 +4,7 @@ const db = require('../db'); // Assuming db connection is in a separate file
 const router = express.Router();
 
 // Route: หน้าแสดงกิจกรรม
-router.get('/', (req, res) => {
+router.get('/event', (req, res) => {
     // sample events data - replace with DB query when ready
     const sampleEvents = [
         { tag: 'OpenHouse', university: 'MIT', title: 'งาน Open House ภาควิชาวิทยาการคอมพิวเตอร์', date: '2024-03-15', time: '14:00 - 17:00', location: 'Campus Center, Boston', interested: 127, description: 'สำรวจหลักสูตรวิทยาการคอมพิวเตอร์ที่ล้ำสมัยของเราและพบปะกับคณาจารย์ เรียนรู้เกี่ยวกับโอกาสในการทำวิจัย...' },

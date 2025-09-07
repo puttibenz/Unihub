@@ -6,91 +6,91 @@
     <title>ลงทะเบียน</title>
     <link rel="stylesheet" href="/css/auth_card.css">
 </head>
-<body>
-    <main class="auth-main-content">
-        <div class="auth-card-container">
-            <div class="auth-card">
-                <h2 class="auth-card-title">เข้าร่วม University Hub</h2>
-                <p class="auth-card-subtitle">สร้างบัญชีของคุณเพื่อสำรวจกิจกรรมมหาวิทยาลัย</p>
-                <form id="register-form">
-                    <div class="form-group">
-                        <label for="name">ชื่อ</label>
-                        <input type="text" id="name" name="name" placeholder="กรอกชื่อของคุณ" required>
+    <body>
+        <main class="auth-main-content">
+            <div class="auth-card-container">
+                <div class="auth-card">
+                    <h2 class="auth-card-title">เข้าร่วม University Hub</h2>
+                    <p class="auth-card-subtitle">สร้างบัญชีของคุณเพื่อสำรวจกิจกรรมมหาวิทยาลัย</p>
+                    <form id="register-form">
+                        <div class="form-group">
+                            <label for="name">ชื่อ</label>
+                            <input type="text" id="name" name="name" placeholder="กรอกชื่อของคุณ" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastname">นามสกุล</label>
+                            <input type="text" id="lastname" name="lastname" placeholder="กรอกนามสกุลของคุณ" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="school">โรงเรียน</label>
+                            <input type="text" id="school" name="school" placeholder="กรอกชื่อโรงเรียนของคุณ" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">อีเมล</label>
+                            <input type="email" id="email" name="email" placeholder="เช่น student@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">รหัสผ่าน</label>
+                            <input type="password" id="password" name="password" placeholder="ตั้งรหัสผ่านที่แข็งแรง" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">ยืนยันรหัสผ่าน</label>
+                            <input type="password" id="confirm-password" name="confirm-password" placeholder="ยืนยันรหัสผ่าน" required>
+                        </div>
+                        <button type="submit" class="btn btn-gradient">สร้างบัญชี</button>
+                    </form>
+                    <div class="auth-divider">
+                        <hr>
+                        <span>หรือ</span>
+                        <hr>
                     </div>
-                    <div class="form-group">
-                        <label for="lastname">นามสกุล</label>
-                        <input type="text" id="lastname" name="lastname" placeholder="กรอกนามสกุลของคุณ" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="school">โรงเรียน</label>
-                        <input type="text" id="school" name="school" placeholder="กรอกชื่อโรงเรียนของคุณ" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">อีเมล</label>
-                        <input type="email" id="email" name="email" placeholder="เช่น student@example.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">รหัสผ่าน</label>
-                        <input type="password" id="password" name="password" placeholder="ตั้งรหัสผ่านที่แข็งแรง" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="confirm-password">ยืนยันรหัสผ่าน</label>
-                        <input type="password" id="confirm-password" name="confirm-password" placeholder="ยืนยันรหัสผ่าน" required>
-                    </div>
-                    <button type="submit" class="btn btn-gradient">สร้างบัญชี</button>
-                </form>
-                <div class="auth-divider">
-                    <hr>
-                    <span>หรือ</span>
-                    <hr>
+                    <p class="auth-switch-link">
+                        มีบัญชีอยู่แล้ว? <a href="/auth/login">เข้าสู่ระบบ</a>
+                    </p>
                 </div>
-                <p class="auth-switch-link">
-                    มีบัญชีอยู่แล้ว? <a href="/auth/login">เข้าสู่ระบบ</a>
-                </p>
             </div>
-        </div>
-    </main>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const registerForm = document.getElementById('register-form');
-            if (registerForm) {
-                registerForm.addEventListener('submit', async function(event) {
-                event.preventDefault();
-                const name = document.getElementById('name').value.trim();
-                const lastname = document.getElementById('lastname').value.trim();
-                const school = document.getElementById('school').value.trim();
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
-                const confirm = document.getElementById('confirm-password') ? document.getElementById('confirm-password').value : '';
+        </main>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const registerForm = document.getElementById('register-form');
+                if (registerForm) {
+                    registerForm.addEventListener('submit', async function(event) {
+                    event.preventDefault();
+                    const name = document.getElementById('name').value.trim();
+                    const lastname = document.getElementById('lastname').value.trim();
+                    const school = document.getElementById('school').value.trim();
+                    const email = document.getElementById('email').value.trim();
+                    const password = document.getElementById('password').value;
+                    const confirm = document.getElementById('confirm-password') ? document.getElementById('confirm-password').value : '';
 
-                if (!name || !lastname || !school || !email || !password || !confirm) {
-                    alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-                    return;
-                }
-                if (password !== confirm) {
-                    alert('รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน');
-                    return;
-                }
+                    if (!name || !lastname || !school || !email || !password || !confirm) {
+                        alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                        return;
+                    }
+                    if (password !== confirm) {
+                        alert('รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน');
+                        return;
+                    }
 
-                try {
-                    const res = await fetch('/auth/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, lastname, school, email, password })
+                    try {
+                        const res = await fetch('/auth/register', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name, lastname, school, email, password })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            alert('ลงทะเบียนสำเร็จ! จะนำคุณไปยังหน้าเข้าสู่ระบบ');
+                            window.location.href = '/auth/login';
+                        } else {
+                            alert(data.message || 'เกิดข้อผิดพลาด');
+                        }
+                        } catch (err) {
+                            alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+                        }
                     });
-                    const data = await res.json();
-                    if (res.ok) {
-                        alert('ลงทะเบียนสำเร็จ! จะนำคุณไปยังหน้าเข้าสู่ระบบ');
-                        window.location.href = '/auth/login';
-                    } else {
-                        alert(data.message || 'เกิดข้อผิดพลาด');
-                    }
-                    } catch (err) {
-                        alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
-                    }
-                });
-            }
-        });
-    </script>
-</body>
+                }
+            });
+        </script>
+    </body>
 </html>

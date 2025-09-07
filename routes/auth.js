@@ -61,10 +61,10 @@ router.post('/login', (req, res) => {
         }
         req.session.user = {
             id: user.UserID,
-            first_name: user.First_Name,
-            last_name: user.Last_Name,
-            school_name: user.School_name,
-            email: user.Email,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            school_name: user.school_name,
+            email: user.email,
         };
         return res.status(200).json({ message: 'เข้าสู่ระบบสำเร็จ' });
     });

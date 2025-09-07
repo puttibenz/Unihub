@@ -26,37 +26,58 @@
     
     <section class="search-filter-section">
         <div class="container">
+            <% // build unique faculty and department lists from events when available %>
+            <% const faculties = Array.from(new Set((events || []).map(e => e.faculty).filter(Boolean))); %>
+            <% const departments = Array.from(new Set((events || []).map(e => e.department).filter(Boolean))); %>
             <div class="search-filter-wrapper">
                 <div class="search-bar">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="ค้นหากิจกรรม, มหาวิทยาลัย, หรือหัวข้อ...">
+                    <input id="search-input" type="text" placeholder="ค้นหากิจกรรม, มหาวิทยาลัย, หรือหัวข้อ...">
                 </div>
                 <div class="filters">
                     <div class="dropdown">
-                        <select>
-                            <option>มหาวิทยาลัยทั้งหมด</option>
-                            <option>MIT</option>
-                            <option>Harvard University</option>
-                            <option>Stanford University</option>
-                            <option>Caltech</option>
-                            <option>Yale University</option>
-                            <option>Wharton</option>
+                        <select id="university-filter">
+                            <option value="">มหาวิทยาลัยทั้งหมด</option>
+                            <% (Array.from(new Set((events || []).map(e => e.university).filter(Boolean)))).forEach(function(u){ %>
+                                <option value="<%= u %>"><%= u %></option>
+                            <% }) %>
                         </select>
                         <i class="fas fa-chevron-down"></i>
                     </div>
+
                     <div class="dropdown">
-                        <select>
-                            <option>ประเภททั้งหมด</option>
-                            <option>OpenHouse</option>
-                            <option>Academic</option>
-                            <option>Social</option>
+                        <select id="type-filter">
+                            <option value="">ประเภททั้งหมด</option>
+                            <% (Array.from(new Set((events || []).map(e => e.tag).filter(Boolean)))).forEach(function(t){ %>
+                                <option value="<%= t %>"><%= t %></option>
+                            <% }) %>
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+
+                    <div class="dropdown">
+                        <select id="faculty-filter">
+                            <option value="">ทุกคณะ (Faculty)</option>
+                            <% faculties.forEach(function(f){ %>
+                                <option value="<%= f %>"><%= f %></option>
+                            <% }) %>
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+
+                    <div class="dropdown">
+                        <select id="department-filter">
+                            <option value="">ทุกภาควิชา (Department)</option>
+                            <% departments.forEach(function(d){ %>
+                                <option value="<%= d %>"><%= d %></option>
+                            <% }) %>
                         </select>
                         <i class="fas fa-chevron-down"></i>
                     </div>
                 </div>
             </div>
             <div class="results-info">
-                <p>พบ <%= (events || []).length %> กิจกรรม</p>
+                <p>พบ <span id="results-count"><%= (events || []).length %></span> กิจกรรม</p>
                 <div class="sort-by">
                     <span>เรียงตามวันที่</span>
                     <i class="fas fa-chevron-down"></i>
@@ -69,8 +90,8 @@
         <div class="container">
             <div class="card-container">
                 <% (events || []).forEach(function(ev){ %>
-                <% const tagClass = (ev.tag || '').toLowerCase().includes('openhouse') ? 'openhouse' : (ev.tag || '').toLowerCase().includes('academic') ? 'academic' : (ev.tag || '').toLowerCase().includes('social') ? 'social' : 'university'; %>
-                <div class="card">
+                    <% const tagClass = (ev.tag || '').toLowerCase().includes('openhouse') ? 'openhouse' : (ev.tag || '').toLowerCase().includes('academic') ? 'academic' : (ev.tag || '').toLowerCase().includes('social') ? 'social' : 'university'; %>
+                    <div class="card" data-university="<%= ev.university %>" data-tag="<%= ev.tag %>" data-faculty="<%= ev.faculty || '' %>" data-department="<%= ev.department || '' %>">
                     <div class="card-header">
                         <div class="tags">
                             <span class="tag <%= tagClass %>"><%= ev.tag %></span>
@@ -103,5 +124,52 @@
     </section>
 
     <%- include('partials/footer') %>
+
+    <script>
+        (function(){
+            const searchInput = document.getElementById('search-input');
+            const uni = document.getElementById('university-filter');
+            const type = document.getElementById('type-filter');
+            const faculty = document.getElementById('faculty-filter');
+            const department = document.getElementById('department-filter');
+            const cards = Array.from(document.querySelectorAll('.card-container .card'));
+            const countEl = document.getElementById('results-count');
+
+            function applyFilters(){
+                const q = (searchInput && searchInput.value || '').toLowerCase();
+                const u = (uni && uni.value || '').toLowerCase();
+                const t = (type && type.value || '').toLowerCase();
+                const f = (faculty && faculty.value || '').toLowerCase();
+                const d = (department && department.value || '').toLowerCase();
+                let visible = 0;
+                cards.forEach(card => {
+                    const text = card.innerText.toLowerCase();
+                    const cardUni = (card.dataset.university || '').toLowerCase();
+                    const cardTag = (card.dataset.tag || '').toLowerCase();
+                    const cardFaculty = (card.dataset.faculty || '').toLowerCase();
+                    const cardDept = (card.dataset.department || '').toLowerCase();
+
+                    const matchesQuery = !q || text.includes(q);
+                    const matchesUni = !u || cardUni === u;
+                    const matchesTag = !t || cardTag === t;
+                    const matchesFac = !f || cardFaculty === f;
+                    const matchesDept = !d || cardDept === d;
+
+                    const show = matchesQuery && matchesUni && matchesTag && matchesFac && matchesDept;
+                    card.style.display = show ? 'flex' : 'none';
+                    if(show) visible++;
+                });
+                if(countEl) countEl.textContent = visible;
+            }
+
+            [searchInput, uni, type, faculty, department].forEach(el => {
+                if(!el) return;
+                el.addEventListener('input', applyFilters);
+                el.addEventListener('change', applyFilters);
+            });
+
+            applyFilters();
+        })();
+    </script>
 </body>
 </html>

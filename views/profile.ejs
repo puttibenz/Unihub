@@ -11,91 +11,91 @@
     <link rel="stylesheet" href="/css/footer.css">
 
 </head>
-<body>
-    <%- include('partials/nav'); %>
+    <body>
+        <%- include('partials/nav'); %>
 
-    <main class="profile-page-content">
-        <div class="container">
-            <section class="profile-info-section card">
-                <div class="profile-header">
-                    <h2 class="profile-name"><%= [(user && user.first_name) || '', (user && user.last_name) || ''].join(' ').trim() || 'ไม่พบชื่อผู้ใช้' %></h2>
-                    <p class="profile-role">นักเรียน</p>
-                </div>
-                <div class="profile-details">
-                    <div class="detail-item">
-                        <i class="fas fa-envelope"></i>
-                        <p><%= (user && user.email) || '-' %></p>
+        <main class="profile-page-content">
+            <div class="container">
+                <section class="profile-info-section card">
+                    <div class="profile-header">
+                        <h2 class="profile-name"><%= [(user && user.first_name) || '', (user && user.last_name) || ''].join(' ').trim() || 'ไม่พบชื่อผู้ใช้' %></h2>
+                        <p class="profile-role">นักเรียน</p>
                     </div>
-                    <div class="detail-item">
-                        <i class="fas fa-university"></i>
-                        <p><%= (user && user.school_name) || '-' %></p>
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <i class="fas fa-envelope"></i>
+                            <p><%= (user && user.email) || '-' %></p>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-university"></i>
+                            <p><%= (user && user.school_name) || '-' %></p>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <p>เข้าร่วมตั้งแต่: มกราคม 2023</p>
+                        </div>
                     </div>
-                    <div class="detail-item">
-                        <i class="fas fa-calendar-alt"></i>
-                        <p>เข้าร่วมตั้งแต่: มกราคม 2023</p>
+                    <div class="profile-actions">
+                        <button class="btn edit-btn">แก้ไขข้อมูล</button>
+                        <button class="btn password-btn">เปลี่ยนรหัสผ่าน</button>
                     </div>
-                </div>
-                <div class="profile-actions">
-                    <button class="btn edit-btn">แก้ไขข้อมูล</button>
-                    <button class="btn password-btn">เปลี่ยนรหัสผ่าน</button>
-                </div>
-            </section>
+                </section>
 
-            <section class="registered-events-section">
-                <h2 class="section-title">กิจกรรมที่ลงทะเบียนแล้ว</h2>
-                <div class="card-container">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="tags">
-                                <span class="tag academic">Academic</span>
-                                <span class="tag university">Harvard University</span>
+                <section class="registered-events-section">
+                    <h2 class="section-title">กิจกรรมที่ลงทะเบียนแล้ว</h2>
+                    <div class="card-container">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="tags">
+                                    <span class="tag academic">Academic</span>
+                                    <span class="tag university">Harvard University</span>
+                                </div>
+                                <h3>Pre-Med Student Workshop</h3>
                             </div>
-                            <h3>Pre-Med Student Workshop</h3>
-                        </div>
-                        <div class="card-body">
-                            <p><i class="fas fa-calendar-alt"></i> March 18, 2024</p>
-                            <p><i class="fas fa-clock"></i> 10:00 AM - 12:00 PM</p>
-                            <p><i class="fas fa-map-marker-alt"></i> Medical School, Cambridge</p>
-                            <p class="interested"><i class="fas fa-users"></i> 89 students interested</p>
-                            <p class="description">Interactive workshop covering MCAT preparation, medical school applications, and career guidance for aspiring medical...</p>
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn join-btn">ยกเลิกกิจกรรม</button>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="tags">
-                                <span class="tag openhouse">OpenHouse</span>
-                                <span class="tag university">MIT</span>
+                            <div class="card-body">
+                                <p><i class="fas fa-calendar-alt"></i> March 18, 2024</p>
+                                <p><i class="fas fa-clock"></i> 10:00 AM - 12:00 PM</p>
+                                <p><i class="fas fa-map-marker-alt"></i> Medical School, Cambridge</p>
+                                <p class="interested"><i class="fas fa-users"></i> 89 students interested</p>
+                                <p class="description">Interactive workshop covering MCAT preparation, medical school applications, and career guidance for aspiring medical...</p>
                             </div>
-                            <h3>Computer Science Open House</h3>
+                            <div class="card-footer">
+                                <button class="btn join-btn">ยกเลิกกิจกรรม</button>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <p><i class="fas fa-calendar-alt"></i> March 15, 2024</p>
-                            <p><i class="fas fa-clock"></i> 2:00 PM - 5:00 PM</p>
-                            <p><i class="fas fa-map-marker-alt"></i> Campus Center, Boston</p>
-                            <p class="interested"><i class="fas fa-users"></i> 127 students interested</p>
-                            <p class="description">Explore our cutting-edge computer science programs and meet faculty members. Learn about research opportunities a...</p>
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn join-btn">ยกเลิกกิจกรรม</button>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="tags">
+                                    <span class="tag openhouse">OpenHouse</span>
+                                    <span class="tag university">MIT</span>
+                                </div>
+                                <h3>Computer Science Open House</h3>
+                            </div>
+                            <div class="card-body">
+                                <p><i class="fas fa-calendar-alt"></i> March 15, 2024</p>
+                                <p><i class="fas fa-clock"></i> 2:00 PM - 5:00 PM</p>
+                                <p><i class="fas fa-map-marker-alt"></i> Campus Center, Boston</p>
+                                <p class="interested"><i class="fas fa-users"></i> 127 students interested</p>
+                                <p class="description">Explore our cutting-edge computer science programs and meet faculty members. Learn about research opportunities a...</p>
+                            </div>
+                            <div class="card-footer">
+                                <button class="btn join-btn">ยกเลิกกิจกรรม</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
-        </div>
-    </main>
+                </section>
+            </div>
+        </main>
 
-    <footer class="footer">
-        <div class="container">
-            <p>สร้างด้วย <i class="fas fa-heart"></i> โดย <a href="#">Lienable</a></p>
-        </div>
-    </footer>
-    <script>
-        const user = JSON.parse('<%- JSON.stringify(user || {}) %>');
-        console.log("user =", user);
-    </script>
-</body>
+        <footer class="footer">
+            <div class="container">
+                <p>สร้างด้วย <i class="fas fa-heart"></i> โดย <a href="#">Lienable</a></p>
+            </div>
+        </footer>
+        <script>
+            const user = JSON.parse('<%- JSON.stringify(user || {}) %>');
+            console.log("user =", user);
+        </script>
+    </body>
 </html>

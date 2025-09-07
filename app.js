@@ -11,7 +11,7 @@ const eventRoutes = require('./routes/event');
 const universitiesRoutes = require('./routes/universities');
 const profileRoutes = require('./routes/profile');
 const announcementRoutes = require('./routes/announcement');
-const crudRoutes = require('./routes/crud');    
+const crudRoutes = require('./routes/admin');    
 
 const db = require('./db'); // นำเข้าโมดูล db.js
 
@@ -42,11 +42,11 @@ app.use((req, res, next) => {
 
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
-app.use('/event', eventRoutes);
-app.use('/universities', universitiesRoutes);
-app.use('/profile', profileRoutes);
-app.use('/announcement', announcementRoutes);
-app.use('/crud', crudRoutes);
+app.use('/', eventRoutes);
+app.use('/', universitiesRoutes);
+app.use('/', profileRoutes);
+app.use('/', announcementRoutes);
+app.use('/', crudRoutes);
 
 app.listen(3000, () => {
     console.log('Server is running')
