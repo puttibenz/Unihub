@@ -72,22 +72,6 @@ router.get('/admin', (req, res) => {
     });
 });
 
-// optional: GET faculties by universityId
-router.get('/admin/faculties', (req, res) => {
-  const universityId = req.query.universityId;
-  const sql = universityId
-    ? 'SELECT ID as id, Name as name, University_ID as universityId FROM faculty WHERE University_ID = ? ORDER BY Name'
-    : 'SELECT ID as id, Name as name, University_ID as universityId FROM faculty ORDER BY Name';
-  const params = universityId ? [universityId] : [];
-  db.query(sql, params, (err, rows) => {
-    if (err) {
-      console.error('DB select faculties error:', err);
-      return res.status(500).json({ success: false, message: 'Database error' });
-    }
-    return res.json({ success: true, faculties: rows });
-  });
-});
-
 //Post /admin/universities
 router.post('/admin/universities', (req, res) => {
     const { name, location, website } = req.body;
