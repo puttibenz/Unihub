@@ -31,3 +31,50 @@ table.admin-table { width:100%; border-collapse:collapse; }
 table.admin-table th, table.admin-table td { padding:18px 12px; text-align:left; border-bottom:1px solid #eef2f6; }
 .actions button { margin-left:8px; }
 .icon-btn{ border:1px solid #e6eef8; background:#fff; padding:8px; border-radius:6px; cursor:pointer }
+
+/* Modal + form control helpers moved from inline styles */
+.hidden { display: none !important; }
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1200;
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+}
+
+/* centered wrapper that holds the modal box */
+.modal-wrapper {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1210;
+    pointer-events: none;
+}
+
+.modal-box {
+    width: 640px;
+    max-width: 95%;
+    background: #fff;
+    border-radius: 8px;
+    padding: 18px;
+    box-shadow: 0 12px 40px rgba(11, 87, 208, 0.12);
+    transform: translateY(12px) scale(0.98);
+    opacity: 0;
+    transition: transform 240ms cubic-bezier(.2,.9,.2,1), opacity 240ms ease;
+    pointer-events: auto;
+}
+.form-label { display: block; font-size: 13px; margin-top: 8px; }
+.form-control, input.form-control, select.form-control { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+.modal-actions { text-align: right; margin-top: 12px; }
+.btn-cancel { background: #eee !important; color: #111 !important; border: 0; padding: 8px 12px; border-radius: 4px; }
+.btn-submit { margin-left: 8px; }
+
+/* active/open state helpers */
+.modal-open .modal-backdrop { opacity: 1; pointer-events: auto; }
+.modal-open .modal-wrapper { pointer-events: auto; }
+.modal-open .modal-box { transform: translateY(0) scale(1); opacity: 1; }
