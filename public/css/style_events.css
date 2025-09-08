@@ -257,3 +257,21 @@ body {
     }
 }
 /* Animation Keyframes */
+
+/* Announcement card tweaks */
+.card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+.announcement-card { display:flex; flex-direction:column; background:#fff; border-radius:8px; padding:16px; box-shadow:0 6px 18px rgba(11,87,208,0.06); }
+.announcement-card .card-header { margin-bottom:8px; }
+.announcement-card .tags { display:flex; gap:8px; align-items:center; margin-bottom:6px; }
+.announcement-card .tag { background:#eef6ff; padding:6px 10px; border-radius:999px; font-size:0.85rem; color:#0b57d0; }
+.announcement-card .ann-title { font-size:1.05rem; margin:0 0 6px 0; }
+.announcement-card .card-body { flex:1 1 auto; }
+.announcement-card .description { color:#333; line-height:1.5; margin-top:8px; }
+.announcement-card .deadline { color:#0b57d0; font-weight:600; }
+.announcement-card .card-footer { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
+.announcement-card .btn { background:#0b57d0; color:#fff; padding:8px 12px; border-radius:6px; border:none; cursor:pointer; }
+.announcement-card .heart-icon{ color:#ff6b6b; }
+
+@media (max-width: 768px) {
+    .card-container { grid-template-columns: 1fr; }
+}

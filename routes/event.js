@@ -5,14 +5,58 @@ const router = express.Router();
 
 // Route: หน้าแสดงกิจกรรม
 router.get('/event', (req, res) => {
-    // sample events data - replace with DB query when ready (ตัวอย่างเป็นมหาวิทยาลัยไทย)
-    const sampleEvents = [
-        { tag: 'OpenHouse', university: 'จุฬาลงกรณ์มหาวิทยาลัย', title: 'วันเปิดบ้านภาควิชาวิทยาการคอมพิวเตอร์', date: '2025-10-15', time: '09:00 - 15:00', location: 'อาคารวิทยาการ จุฬาลงกรณ์', interested: 320, description: 'ร่วมสำรวจหลักสูตรและห้องปฏิบัติการ พบอาจารย์และนักศึกษาปัจจุบัน' },
-        { tag: 'Academic', university: 'มหาวิทยาลัยมหิดล', title: 'เวิร์คช็อปเตรียมแพทย์สำหรับนักเรียนมัธยม', date: '2025-10-20', time: '10:00 - 12:00', location: 'คณะแพทยศาสตร์ ม.มหิดล ศาลายา', interested: 210, description: 'แนวทางการเตรียมตัวสอบและการสมัครเข้าคณะแพทยศาสตร์ พร้อมคำแนะนำจากรุ่นพี่' },
-        { tag: 'Academic', university: 'มหาวิทยาลัยเกษตรศาสตร์', title: 'งานนวัตกรรมการเกษตร', date: '2025-11-12', time: '13:00 - 18:00', location: 'อาคารวิจัย มก.', interested: 150, description: 'นิทรรศการผลงานวิจัยและโครงการนวัตกรรมด้านการเกษตรและเทคโนโลยี' }
-    ];
+    // fetch events from DB and render the event page
+    const sql = `SELECT e.ID as id, e.Title as title, e.description as description, e.location as location, e.start_time as start_time, e.end_date as end_time, c.Name as tag, u.Name as university, f.Name as faculty, d.Name as department
+                 FROM events e
+                 LEFT JOIN category c ON e.category_ID = c.ID
+                 LEFT JOIN university u ON e.university_ID = u.ID
+                 LEFT JOIN faculty f ON e.faculty_ID = f.ID
+                 LEFT JOIN department d ON e.Department_ID = d.ID
+                 ORDER BY e.start_time DESC`;
 
-    res.render('event', { title: 'Event', events: sampleEvents });
+    db.query(sql, (err, rows) => {
+        if (err) {
+            console.error('Error querying events for /event page:', err);
+            // fallback to empty list so the page still renders
+            return res.render('event', { title: 'Event', events: [] });
+        }
+
+        const events = (rows || []).map(r => {
+            // compute date and time strings the template expects
+            let dateStr = '';
+            let timeStr = '';
+            try{
+                if(r.start_time){
+                    const s = new Date(r.start_time);
+                    dateStr = isNaN(s) ? '' : s.toISOString().slice(0,10); // YYYY-MM-DD
+                }
+                if(r.start_time && r.end_time){
+                    const s = new Date(r.start_time);
+                    const e = new Date(r.end_time);
+                    if(!isNaN(s) && !isNaN(e)){
+                        const pad = n => String(n).padStart(2,'0');
+                        timeStr = pad(s.getHours()) + ':' + pad(s.getMinutes()) + ' - ' + pad(e.getHours()) + ':' + pad(e.getMinutes());
+                    }
+                }
+            }catch(ex){ }
+
+            return {
+                id: r.id,
+                tag: r.tag || '',
+                university: r.university || '',
+                title: r.title || '',
+                date: dateStr,
+                time: timeStr,
+                location: r.location || '',
+                interested: r.interested || undefined,
+                description: r.description || '',
+                faculty: r.faculty || null,
+                department: r.department || null
+            };
+        });
+
+        return res.render('event', { title: 'Event', events });
+    });
 });
 
 module.exports = router;

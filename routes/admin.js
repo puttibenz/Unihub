@@ -49,6 +49,8 @@ router.get('/admin', (req, res) => {
                 const normFacs = (facs || []).map(f => ({
                     id: f.ID ?? f.id,
                     name: f.Name ?? f.name,
+                    // include universityId so client can filter faculties by selected university
+                    universityId: (f.University_ID ?? f.UniversityId ?? f.universityId ?? null),
                     university: f.UniversityName ?? f.University ?? f.university
                 }));
 
@@ -61,14 +63,81 @@ router.get('/admin', (req, res) => {
                     university: d.UniversityName ?? d.University ?? d.university
                 }));
 
-                return res.render('crud', {
-                    title: 'CRUD Operations',
-                    universities: normUnis,
-                    faculties: normFacs,
-                    departments: normDeps
+                // also fetch events and announcements to embed into the admin page
+                const eventsSql = `SELECT e.ID as id, e.Title as title, e.description as description, e.location as location, e.start_time as start_time, e.end_date as end_time, c.Name as category, u.Name as university, f.Name as faculty, d.Name as department
+                                   FROM events e
+                                   LEFT JOIN category c ON e.category_ID = c.ID
+                                   LEFT JOIN university u ON e.university_ID = u.ID
+                                   LEFT JOIN faculty f ON e.faculty_ID = f.ID
+                                   LEFT JOIN department d ON e.Department_ID = d.ID
+                                   ORDER BY e.start_time DESC`;
+
+                db.query(eventsSql, (errE, eventsRows) => {
+                    if (errE) {
+                        console.error('DB select events error:', errE);
+                        eventsRows = [];
+                    }
+
+                    const annSql = `SELECT a.ID as id, a.Title as title, a.description as description, u.Name as university, f.Name as faculty, d.Name as department
+                                    FROM announcement a
+                                    LEFT JOIN university u ON a.university_ID = u.ID
+                                    LEFT JOIN faculty f ON a.faculty_ID = f.ID
+                                    LEFT JOIN department d ON a.Department_ID = d.ID
+                                    ORDER BY a.ID DESC`;
+
+                    db.query(annSql, (errA, annRows) => {
+                        if (errA) {
+                            console.error('DB select announcements error:', errA);
+                            annRows = [];
+                        }
+
+                        const normEvents = (eventsRows || []).map(r => ({
+                            id: r.id,
+                            title: r.title,
+                            description: r.description,
+                            location: r.location,
+                            start_time: r.start_time,
+                            end_time: r.end_time,
+                            category: r.category || null,
+                            university: r.university || null,
+                            faculty: r.faculty || null,
+                            department: r.department || null
+                        }));
+
+                        const normAnns = (annRows || []).map(r => ({
+                            id: r.id,
+                            title: r.title,
+                            description: r.description,
+                            university: r.university || null,
+                            faculty: r.faculty || null,
+                            department: r.department || null
+                        }));
+
+                        // debug: log sizes of loaded collections to help diagnose missing select options
+                        try { console.log('/admin render: unis=', (normUnis||[]).length, 'facs=', (normFacs||[]).length, 'deps=', (normDeps||[]).length, 'events=', (normEvents||[]).length, 'anns=', (normAnns||[]).length); } catch(e){}
+
+                        return res.render('crud', {
+                            title: 'CRUD Operations',
+                            universities: normUnis,
+                            faculties: normFacs,
+                            departments: normDeps,
+                            events: normEvents,
+                            announcements: normAnns
+                        });
+                    });
                 });
             });
         });
+    });
+});
+
+// quick JSON endpoint to inspect faculties from browser/devtools
+router.get('/admin/faculties', (req, res) => {
+    const sqlFacs = `SELECT f.ID, f.Name, f.University_ID, u.Name as UniversityName FROM faculty f JOIN university u ON f.University_ID = u.ID ORDER BY f.Name`;
+    db.query(sqlFacs, (err, facs) => {
+        if (err) return res.status(500).json({ success:false, message:'DB error', error: String(err) });
+        const normFacs = (facs || []).map(f => ({ id: f.ID ?? f.id, name: f.Name ?? f.name, universityId: f.University_ID ?? null, university: f.UniversityName ?? null }));
+        return res.json({ success:true, count: normFacs.length, faculties: normFacs });
     });
 });
 
@@ -322,7 +391,85 @@ router.post('/admin/events', (req, res) => {
     });
 });
 
-// ...existing code...
+router.post('/admin/announcements', (req, res) => {
+    // accept title (required), description (optional), university (name, required), faculty (name optional), department (name optional)
+    const uniRaw = req.body.university ?? req.body.University;
+    const facRaw = req.body.faculty ?? req.body.Faculty;
+    const depRaw = req.body.department ?? req.body.Department;
+    const { title, description } = req.body;
+
+    if (!title || String(title).trim() === '') return res.status(400).json({ success:false, message:'title is required' });
+    if (uniRaw == null || String(uniRaw).trim() === '') return res.status(400).json({ success:false, message:'university (name) is required' });
+
+    // helper to detect numeric id - we require names (no numeric ids)
+    const isId = v => v != null && String(v).match(/^\d+$/);
+    if (isId(uniRaw)) return res.status(400).json({ success:false, message:'university must be provided as a name string (no numeric id)' });
+    if (facRaw && isId(facRaw)) return res.status(400).json({ success:false, message:'faculty must be provided as a name string (no numeric id)' });
+    if (depRaw && isId(depRaw)) return res.status(400).json({ success:false, message:'department must be provided as a name string (no numeric id)' });
+
+    function resolveUniversity(cb){
+        db.query('SELECT ID FROM university WHERE LOWER(Name) = LOWER(?) LIMIT 1', [String(uniRaw).trim()], (err, rows) => {
+            if (err) return cb(err);
+            if (!rows || !rows.length) return cb(new Error('university_not_found'));
+            cb(null, rows[0].ID);
+        });
+    }
+
+    function resolveFaculty(universityId, cb){
+        if (!facRaw || String(facRaw).trim() === '') return cb(null, null);
+        db.query('SELECT ID FROM faculty WHERE LOWER(Name) = LOWER(?) AND University_ID = ? LIMIT 1', [String(facRaw).trim(), universityId], (err, rows) => {
+            if (err) return cb(err);
+            if (!rows || !rows.length) return cb(new Error('faculty_not_found'));
+            cb(null, rows[0].ID);
+        });
+    }
+
+    function resolveDepartment(facultyId, cb){
+        if (!depRaw || String(depRaw).trim() === '') return cb(null, null);
+        if (!facultyId) return cb(new Error('department_requires_faculty'));
+        db.query('SELECT ID FROM department WHERE LOWER(Name) = LOWER(?) AND Faculty_ID = ? LIMIT 1', [String(depRaw).trim(), facultyId], (err, rows) => {
+            if (err) return cb(err);
+            if (!rows || !rows.length) return cb(new Error('department_not_found'));
+            cb(null, rows[0].ID);
+        });
+    }
+
+    resolveUniversity((err, universityId) => {
+        if (err) {
+            if (err.message === 'university_not_found') return res.status(400).json({ success:false, message:'University not found' });
+            console.error('DB error resolving university (announcement):', err);
+            return res.status(500).json({ success:false, message:'Database error' });
+        }
+
+        resolveFaculty(universityId, (err2, facultyId) => {
+            if (err2) {
+                if (err2.message === 'faculty_not_found') return res.status(400).json({ success:false, message:'Faculty not found for this university' });
+                console.error('DB error resolving faculty (announcement):', err2);
+                return res.status(500).json({ success:false, message:'Database error' });
+            }
+
+            resolveDepartment(facultyId, (err3, departmentId) => {
+                if (err3) {
+                    if (err3.message === 'department_requires_faculty') return res.status(400).json({ success:false, message:'Department provided but faculty is missing' });
+                    if (err3.message === 'department_not_found') return res.status(400).json({ success:false, message:'Department not found for this faculty' });
+                    console.error('DB error resolving department (announcement):', err3);
+                    return res.status(500).json({ success:false, message:'Database error' });
+                }
+
+                const sql = 'INSERT INTO announcement (Title, description, university_ID, faculty_ID, Department_ID) VALUES (?, ?, ?, ?, ?)';
+                const params = [ String(title).trim(), description || null, universityId, facultyId, departmentId ];
+                db.query(sql, params, (err4, result) => {
+                    if (err4) {
+                        console.error('Error inserting announcement:', err4);
+                        return res.status(500).json({ success:false, message:'Error inserting announcement' });
+                    }
+                    return res.status(201).json({ success:true, id: result.insertId });
+                });
+            });
+        });
+    });
+});
+
 module.exports = router;
 
 
