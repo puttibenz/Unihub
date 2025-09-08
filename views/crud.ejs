@@ -113,7 +113,9 @@
                     <h3>Events</h3>
                     <p class="muted">Manage events</p>
                 </div>
-                <button class="btn-primary" onclick="onAdd('event')">+ Add Event</button>
+                <div class="panel-controls">
+                    <button class="btn-primary" onclick="onAdd('event')">+ Add Event</button>
+                </div>
             </div>
             <table class="admin-table">
                 <thead>
@@ -122,7 +124,7 @@
                 <tbody>
                     <% const evSample = (typeof events !== 'undefined' && events) ? events : []; %>
                     <% evSample.forEach(function(e){ %>
-                        <tr>
+                        <tr data-category="<%= (e.tag || e.category || '') %>">
                             <td><%= e.title || e.Title || 'Untitled' %></td>
                             <td><%= e.date || '-' %></td>
                             <td><%= e.location || '-' %></td>
@@ -132,6 +134,8 @@
                 </tbody>
             </table>
         </section>
+        
+        
 
     </div>
 
@@ -170,6 +174,28 @@
                         <input id="dept-name" type="text" placeholder="ชื่อสาขา" class="form-control" />
                     </div>
 
+                    <!-- Event -->
+                    <div id="form-event" class="hidden">
+                        <label class="form-label">มหาวิทยาลัย</label>
+                        <select id="event-university" class="form-control"></select>
+                        <label class="form-label">คณะ</label>
+                        <select id="event-faculty" class="form-control"></select>
+                        <label class="form-label">สาขา</label>
+                        <input id="event-major" type="text" placeholder="สาขา (ถ้ามี)" class="form-control" />
+                        <label class="form-label">ประเภท (Category)</label>
+                        <select id="event-category" class="form-control"></select>
+                        <label class="form-label">Title</label>
+                        <input id="event-title" type="text" placeholder="ชื่อกิจกรรม" class="form-control" />
+                        <label class="form-label">Description</label>
+                        <textarea id="event-description" rows="3" class="form-control"></textarea>
+                        <label class="form-label">Location</label>
+                        <input id="event-location" type="text" class="form-control" />
+                        <label class="form-label">Start Time</label>
+                        <input id="event-start" type="datetime-local" class="form-control" />
+                        <label class="form-label">End Time</label>
+                        <input id="event-end" type="datetime-local" class="form-control" />
+                    </div>
+
                     <div class="modal-actions">
                         <button type="button" id="add-modal-cancel" class="btn-primary btn-cancel">ยกเลิก</button>
                         <button type="submit" class="btn-primary btn-submit">บันทึก</button>
@@ -180,7 +206,7 @@
             </div>
         </div>
 
-    <%- include('partials/footer') %>
+    <!-- <%- include('partials/footer') %> -->
 
     <!-- data container (JSON embedded safely in HTML attributes) -->
     <div id="__DATA__container" class="hidden"
@@ -264,10 +290,46 @@
         const deptUniversitySelect = document.getElementById('dept-university');
         const deptFacultySelect = document.getElementById('dept-faculty');
         const deptNameInput = document.getElementById('dept-name');
+    // Event inputs
+    const eventUniversitySelect = document.getElementById('event-university');
+    const eventFacultySelect = document.getElementById('event-faculty');
+    const eventCategorySelect = document.getElementById('event-category');
+    const eventMajorInput = document.getElementById('event-major');
+    const eventTitleInput = document.getElementById('event-title');
+    const eventDescriptionInput = document.getElementById('event-description');
+    const eventLocationInput = document.getElementById('event-location');
+    const eventStartInput = document.getElementById('event-start');
+    const eventEndInput = document.getElementById('event-end');
 
         // initialize selects from embedded data
         populateUniversitySelect(facUniversitySelect);
         populateUniversitySelect(deptUniversitySelect);
+        populateUniversitySelect(eventUniversitySelect);
+        populateFacultySelectForUniversity(eventFacultySelect, '');
+        // categories (can be static or loaded from server)
+        const CATEGORIES = ['OpenHouse','Academic','Social','Workshop','Seminar'];
+        function populateCategorySelect(sel){
+            if(!sel) return;
+            sel.innerHTML = '<option value="">-- เลือกประเภท --</option>';
+            CATEGORIES.forEach(c=>{ const opt = document.createElement('option'); opt.value = c; opt.textContent = c; sel.appendChild(opt); });
+        }
+        populateCategorySelect(eventCategorySelect);
+        // populate events filter select
+        const eventsFilterCategory = document.getElementById('events-filter-category');
+        if(eventsFilterCategory){
+            // populate only categories (no "all" option) and select the first category by default
+            eventsFilterCategory.innerHTML = '';
+            CATEGORIES.forEach((c, idx)=>{ const o = document.createElement('option'); o.value = c; o.textContent = c; if(idx===0) o.selected = true; eventsFilterCategory.appendChild(o); });
+            // apply initial filter
+            (function(){ const v = eventsFilterCategory.value; document.querySelectorAll('#panel-events tbody tr').forEach(tr=>{ const cat = tr.dataset.category || ''; tr.style.display = (v === '' || v === cat) ? '' : 'none'; }); })();
+            eventsFilterCategory.addEventListener('change', ()=>{
+                const v = eventsFilterCategory.value;
+                document.querySelectorAll('#panel-events tbody tr').forEach(tr=>{
+                    const cat = tr.dataset.category || '';
+                    tr.style.display = (v === '' || v === cat) ? '' : 'none';
+                });
+            });
+        }
         populateFacultySelectForUniversity(deptFacultySelect, '');
 
         // table bodies for runtime updates
@@ -307,11 +369,13 @@
         function onAdd(type){
             // show modal with contextual title and reveal proper form
             addModal.dataset.type = type;
-            addModalTitle.textContent = (type === 'university') ? 'เพิ่มมหาวิทยาลัย' : (type === 'faculty') ? 'เพิ่มคณะ' : (type === 'department') ? 'เพิ่มสาขา' : 'Add';
+            addModalTitle.textContent = (type === 'university') ? 'เพิ่มมหาวิทยาลัย' : (type === 'faculty') ? 'เพิ่มคณะ' : (type === 'department') ? 'เพิ่มสาขา' : (type === 'event') ? 'เพิ่มกิจกรรม' : 'Add';
             // hide all forms
             formUniversity.classList.add('hidden');
             formFaculty.classList.add('hidden');
             formDepartment.classList.add('hidden');
+            const formEvent = document.getElementById('form-event');
+            if(formEvent) formEvent.classList.add('hidden');
             // show the right one
             if(type === 'university'){
                 formUniversity.classList.remove('hidden');
@@ -319,6 +383,11 @@
                 formFaculty.classList.remove('hidden');
             } else if(type === 'department'){
                 formDepartment.classList.remove('hidden');
+            } else if(type === 'event'){
+                if(formEvent) formEvent.classList.remove('hidden');
+                // populate selects
+                populateUniversitySelect(eventUniversitySelect);
+                populateFacultySelectForUniversity(eventFacultySelect, eventUniversitySelect.value || '');
             }
             // reset inputs
             uniNameInput.value = '';
@@ -326,6 +395,16 @@
             uniWebsiteInput.value = '';
             facNameInput.value = '';
             deptNameInput.value = '';
+            // reset event inputs
+            if(eventUniversitySelect) eventUniversitySelect.value = '';
+            if(eventFacultySelect) eventFacultySelect.innerHTML = '<option value="">-- เลือกคณะ --</option>';
+            if(eventCategorySelect) eventCategorySelect.value = '';
+            if(eventMajorInput) eventMajorInput.value = '';
+            if(eventTitleInput) eventTitleInput.value = '';
+            if(eventDescriptionInput) eventDescriptionInput.value = '';
+            if(eventLocationInput) eventLocationInput.value = '';
+            if(eventStartInput) eventStartInput.value = '';
+            if(eventEndInput) eventEndInput.value = '';
 
             // make modal visible and animate via CSS by toggling modal-open on root
             document.documentElement.classList.add('modal-open');
@@ -410,6 +489,37 @@
                     const deptObj = { id: String(data.id), name: payload.name, facultyId: (_FACS.find(f=>f.name===payload.faculty)||{}).id, universityId: (_UNIS.find(u=>u.name===payload.university)||{}).id };
                     appendDepartmentRow(deptObj);
                     alert('เพิ่มสาขาสำเร็จ');
+                } else if(type === 'event'){
+                    const payload = {
+                        universityId: eventUniversitySelect.value || '',
+                        university: eventUniversitySelect.selectedOptions[0]?.textContent?.trim() || '',
+                        facultyId: eventFacultySelect.value || '',
+                        faculty: eventFacultySelect.selectedOptions[0]?.textContent?.trim() || '',
+                        major: eventMajorInput.value.trim() || '',
+                        title: eventTitleInput.value.trim() || '',
+                        description: eventDescriptionInput.value.trim() || '',
+                        location: eventLocationInput.value.trim() || '',
+                        startTime: eventStartInput.value || '',
+                        endTime: eventEndInput.value || '',
+                        category: eventCategorySelect?.value || ''
+                    };
+                    if(!payload.title) return alert('กรุณากรอกชื่อกิจกรรม');
+                    // try admin endpoint first
+                    let res;
+                    try{
+                        res = await fetch('/admin/events', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+                    }catch(x){ res = null; }
+                    if(res && res.ok){
+                        const data = await res.json().catch(()=>({}));
+                        const newEvent = { id: String(data.id || ''), title: payload.title, date: payload.startTime || '', location: payload.location || '', category: payload.category || '' };
+                        appendEventRow(newEvent);
+                        alert('เพิ่มกิจกรรมสำเร็จ');
+                    } else {
+                        // fallback: client-only append
+                        const newEvent = { id: String(Date.now()), title: payload.title, date: payload.startTime || '', location: payload.location || '', category: payload.category || '' };
+                        appendEventRow(newEvent);
+                        alert('เพิ่มกิจกรรม (client-only)');
+                    }
                 } else {
                     const name = (document.getElementById('add-modal-name') || {}).value || '';
                     console.log('Add generic (UI only):', { type, name });
@@ -420,6 +530,15 @@
                 alert(err.message || 'เกิดข้อผิดพลาด');
             }
         });
+
+        // Append an event row into events table
+        function appendEventRow(ev){
+            const tbody = document.querySelector('#panel-events tbody');
+            if(!tbody) return;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${escapeHtml(ev.title||'')}</td><td>${escapeHtml(ev.date||'-')}</td><td>${escapeHtml(ev.location||'-')}</td><td class="actions"><button class="icon-btn" data-id="${ev.id||''}" onclick="onEdit('event', this.dataset.id)">✎</button><button class="icon-btn" data-id="${ev.id||''}" onclick="onDelete('event', this.dataset.id)">🗑</button></td>`;
+            tbody.appendChild(tr);
+        }
 
         // keep existing edit/delete placeholders
         function onEdit(type, id){
