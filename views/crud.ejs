@@ -273,7 +273,8 @@
     <div id="__DATA__container" class="hidden"
          data-universities='<%- JSON.stringify(typeof universities !== "undefined" ? universities : []) %>'
          data-faculties='<%- JSON.stringify(typeof faculties !== "undefined" ? faculties : []) %>'
-         data-departments='<%- JSON.stringify(typeof departments !== "undefined" ? departments : []) %>'></div>
+         data-departments='<%- JSON.stringify(typeof departments !== "undefined" ? departments : []) %>'
+         data-categories='<%- JSON.stringify(typeof categories !== "undefined" ? categories : []) %>'></div>
 
     <script>
         // parse embedded JSON from data container
@@ -281,6 +282,7 @@
         const __UNIVERSITIES = JSON.parse(__DATA_CONTAINER?.getAttribute('data-universities') || '[]');
     const __FACULTIES = JSON.parse(__DATA_CONTAINER?.getAttribute('data-faculties') || '[]');
     const __DEPARTMENTS = JSON.parse(__DATA_CONTAINER?.getAttribute('data-departments') || '[]');
+    const __CATEGORIES = JSON.parse(__DATA_CONTAINER?.getAttribute('data-categories') || '[]');
 
         // normalize server data to a consistent client shape
         const _UNIS = (__UNIVERSITIES || []).map(u => ({
@@ -433,8 +435,9 @@
     if(annUniversitySelect) populateUniversitySelect(annUniversitySelect);
     populateFacultySelectForUniversity(eventFacultySelect, '');
     populateDepartmentSelectForFaculty(eventMajorInput, '', '');
-        // categories (can be static or loaded from server)
-        const CATEGORIES = ['OpenHouse','Academic','Social','Workshop','Seminar'];
+        // categories: prefer embedded server-provided list, fallback to static list
+        const _EMBEDDED_CATS = (__CATEGORIES || []).map(c => (typeof c === 'string' ? c : (c.name || c.Name || c.Category || ''))).filter(Boolean);
+        const CATEGORIES = (_EMBEDDED_CATS.length > 0) ? _EMBEDDED_CATS : ['OpenHouse','Academic','Social','Workshop','Seminar'];
         function populateCategorySelect(sel){
             if(!sel) return;
             sel.innerHTML = '<option value="">-- เลือกประเภท --</option>';
@@ -529,7 +532,7 @@
 
             //reset dept selects
             if(deptFacultySelect) deptFacultySelect.innerHTML = '<option value="">-- เลือกคณะ --</option>';
-            
+
             // reset event inputs
             if(eventUniversitySelect) eventUniversitySelect.value = '';
             if(eventFacultySelect) eventFacultySelect.innerHTML = '<option value="">-- ทุกคณะ --</option>';
@@ -645,12 +648,25 @@
                     appendDepartmentRow(deptObj);
                     alert('เพิ่มสาขาสำเร็จ');
                 } else if(type === 'event'){
+                    // derive values from selects using the presence of a value (not the displayed text)
+                    const uniId = eventUniversitySelect.value || '';
+                    const uniName = uniId ? (eventUniversitySelect.selectedOptions[0]?.textContent?.trim() || '') : '';
+                    const facId = eventFacultySelect.value || '';
+                    const facName = facId ? (eventFacultySelect.selectedOptions[0]?.textContent?.trim() || '') : '';
+                    const depId = eventMajorInput.value || '';
+                    // if department id selected, map to its name from embedded _DEPS
+                    let depName = '';
+                    if(depId){
+                        const d = (_DEPS || []).find(x => String(x.id) === String(depId));
+                        depName = d ? d.name : (eventMajorInput.selectedOptions[0]?.textContent?.trim() || '');
+                    }
+
                     const payload = {
-                        universityId: eventUniversitySelect.value || '',
-                        university: eventUniversitySelect.selectedOptions[0]?.textContent?.trim() || '',
-                        facultyId: eventFacultySelect.value || '',
-                        faculty: eventFacultySelect.selectedOptions[0]?.textContent?.trim() || '',
-                        major: eventMajorInput.selectedOptions && eventMajorInput.selectedOptions[0] ? eventMajorInput.selectedOptions[0].textContent.trim() : (eventMajorInput.value || ''),
+                        universityId: uniId,
+                        university: uniName,
+                        facultyId: facId,
+                        faculty: facName,
+                        major: depName || null,
                         title: eventTitleInput.value.trim() || '',
                         description: eventDescriptionInput.value.trim() || '',
                         location: eventLocationInput.value.trim() || '',
@@ -658,12 +674,45 @@
                         endTime: eventEndInput.value || '',
                         category: eventCategorySelect?.value || ''
                     };
+
+                    // Normalize empty selections to null for server (server expects null for optional relations)
+                    if(!payload.university || String(payload.university).trim() === '') payload.university = null;
+                    if(!payload.universityId || String(payload.universityId).trim() === '') payload.universityId = null;
+                    if(!payload.faculty || String(payload.faculty).trim() === '') payload.faculty = null;
+                    if(!payload.facultyId || String(payload.facultyId).trim() === '') payload.facultyId = null;
+                    if(!payload.major || String(payload.major).trim() === '') payload.major = null;
                     if(!payload.title) return alert('กรุณากรอกชื่อกิจกรรม');
+                    // client-side time validation
+                    if(!payload.startTime || !payload.endTime) return alert('กรุณาเลือกเวลาเริ่มและเวลาสิ้นสุด');
+                    const s = new Date(payload.startTime);
+                    const e = new Date(payload.endTime);
+                    if(isNaN(s) || isNaN(e) || s >= e) return alert('ช่วงเวลาที่เลือกไม่ถูกต้อง (start < end required)');
+
+                    // if user selected a department but left faculty as "-- ทุกคณะ --", auto-fill faculty from departments data
+                    const selectedDepId = eventMajorInput && eventMajorInput.value ? String(eventMajorInput.value) : '';
+                    if(selectedDepId && (!payload.facultyId || String(payload.facultyId).trim() === '')){
+                        const depObj = (_DEPS || []).find(d => String(d.id) === String(selectedDepId));
+                        if(depObj){
+                            // set department name for server and also set faculty from dep
+                            payload.major = depObj.name || payload.major || '';
+                            const facObj = (_FACS || []).find(f => String(f.id) === String(depObj.facultyId));
+                            if(facObj){ payload.faculty = facObj.name || ''; payload.facultyId = facObj.id || ''; }
+                        }
+                    } else if(selectedDepId){
+                        // ensure payload.major is the department name when an id is selected
+                        const depObj2 = (_DEPS || []).find(d => String(d.id) === String(selectedDepId));
+                        if(depObj2) payload.major = depObj2.name || payload.major || '';
+                    }
+
                     // try admin endpoint first
                     let res;
                     try{
                         res = await fetch('/admin/events', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-                    }catch(x){ res = null; }
+                    }catch(err){
+                        res = null;
+                        console.warn('Network error posting event:', err);
+                    }
+
                     if(res && res.ok){
                         const data = await res.json().catch(()=>({}));
                         const newEvent = {
@@ -681,7 +730,18 @@
                         appendEventRow(newEvent);
                         alert('เพิ่มกิจกรรมสำเร็จ');
                     } else {
-                        // fallback: client-only append
+                        // surface server error details
+                        if(res){
+                            const errBody = await res.json().catch(()=>null);
+                            const msg = (errBody && errBody.message) ? errBody.message : (res.statusText || ('status ' + res.status));
+                            const doFallback = confirm('ไม่สามารถเพิ่มกิจกรรมบนเซิร์ฟเวอร์: ' + msg + '\n\nต้องการบันทึกเฉพาะบนเครื่อง (client-only) หรือไม่?');
+                            if(!doFallback) return;
+                        } else {
+                            const doFallback = confirm('ไม่สามารถติดต่อเซิร์ฟเวอร์เพื่อเพิ่มกิจกรรม\nต้องการบันทึกเฉพาะบนเครื่อง (client-only) หรือไม่?');
+                            if(!doFallback) return;
+                        }
+
+                        // client-only fallback (user confirmed)
                         const newEvent = {
                             id: String(Date.now()),
                             title: payload.title,

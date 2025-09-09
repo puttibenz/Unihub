@@ -63,66 +63,76 @@ router.get('/admin', (req, res) => {
                     university: d.UniversityName ?? d.University ?? d.university
                 }));
 
-                // also fetch events and announcements to embed into the admin page
-                const eventsSql = `SELECT e.ID as id, e.Title as title, e.description as description, e.location as location, e.start_time as start_time, e.end_date as end_time, c.Name as category, u.Name as university, f.Name as faculty, d.Name as department
-                                   FROM events e
-                                   LEFT JOIN category c ON e.category_ID = c.ID
-                                   LEFT JOIN university u ON e.university_ID = u.ID
-                                   LEFT JOIN faculty f ON e.faculty_ID = f.ID
-                                   LEFT JOIN department d ON e.Department_ID = d.ID
-                                   ORDER BY e.start_time DESC`;
-
-                db.query(eventsSql, (errE, eventsRows) => {
-                    if (errE) {
-                        console.error('DB select events error:', errE);
-                        eventsRows = [];
+                // fetch categories as well, then fetch events and announcements to embed into the admin page
+                const catsSql = 'SELECT ID as id, Name as name FROM category ORDER BY Name';
+                db.query(catsSql, (errC, catsRows) => {
+                    if (errC) {
+                        console.error('DB select categories error:', errC);
+                        catsRows = [];
                     }
+                    const normCats = (catsRows || []).map(c => ({ id: c.id, name: c.name }));
 
-                    const annSql = `SELECT a.ID as id, a.Title as title, a.description as description, u.Name as university, f.Name as faculty, d.Name as department
-                                    FROM announcement a
-                                    LEFT JOIN university u ON a.university_ID = u.ID
-                                    LEFT JOIN faculty f ON a.faculty_ID = f.ID
-                                    LEFT JOIN department d ON a.Department_ID = d.ID
-                                    ORDER BY a.ID DESC`;
+                    const eventsSql = `SELECT e.ID as id, e.Title as title, e.description as description, e.location as location, e.start_time as start_time, e.end_date as end_time, c.Name as category, u.Name as university, f.Name as faculty, d.Name as department
+                                       FROM events e
+                                       LEFT JOIN category c ON e.category_ID = c.ID
+                                       LEFT JOIN university u ON e.university_ID = u.ID
+                                       LEFT JOIN faculty f ON e.faculty_ID = f.ID
+                                       LEFT JOIN department d ON e.Department_ID = d.ID
+                                       ORDER BY e.start_time DESC`;
 
-                    db.query(annSql, (errA, annRows) => {
-                        if (errA) {
-                            console.error('DB select announcements error:', errA);
-                            annRows = [];
+                    db.query(eventsSql, (errE, eventsRows) => {
+                        if (errE) {
+                            console.error('DB select events error:', errE);
+                            eventsRows = [];
                         }
 
-                        const normEvents = (eventsRows || []).map(r => ({
-                            id: r.id,
-                            title: r.title,
-                            description: r.description,
-                            location: r.location,
-                            start_time: r.start_time,
-                            end_time: r.end_time,
-                            category: r.category || null,
-                            university: r.university || null,
-                            faculty: r.faculty || null,
-                            department: r.department || null
-                        }));
+                        const annSql = `SELECT a.ID as id, a.Title as title, a.description as description, u.Name as university, f.Name as faculty, d.Name as department
+                                        FROM announcement a
+                                        LEFT JOIN university u ON a.university_ID = u.ID
+                                        LEFT JOIN faculty f ON a.faculty_ID = f.ID
+                                        LEFT JOIN department d ON a.Department_ID = d.ID
+                                        ORDER BY a.ID DESC`;
 
-                        const normAnns = (annRows || []).map(r => ({
-                            id: r.id,
-                            title: r.title,
-                            description: r.description,
-                            university: r.university || null,
-                            faculty: r.faculty || null,
-                            department: r.department || null
-                        }));
+                        db.query(annSql, (errA, annRows) => {
+                            if (errA) {
+                                console.error('DB select announcements error:', errA);
+                                annRows = [];
+                            }
 
-                        // debug: log sizes of loaded collections to help diagnose missing select options
-                        try { console.log('/admin render: unis=', (normUnis||[]).length, 'facs=', (normFacs||[]).length, 'deps=', (normDeps||[]).length, 'events=', (normEvents||[]).length, 'anns=', (normAnns||[]).length); } catch(e){}
+                            const normEvents = (eventsRows || []).map(r => ({
+                                id: r.id,
+                                title: r.title,
+                                description: r.description,
+                                location: r.location,
+                                start_time: r.start_time,
+                                end_time: r.end_time,
+                                category: r.category || null,
+                                university: r.university || null,
+                                faculty: r.faculty || null,
+                                department: r.department || null
+                            }));
 
-                        return res.render('crud', {
-                            title: 'CRUD Operations',
-                            universities: normUnis,
-                            faculties: normFacs,
-                            departments: normDeps,
-                            events: normEvents,
-                            announcements: normAnns
+                            const normAnns = (annRows || []).map(r => ({
+                                id: r.id,
+                                title: r.title,
+                                description: r.description,
+                                university: r.university || null,
+                                faculty: r.faculty || null,
+                                department: r.department || null
+                            }));
+
+                            // debug: log sizes of loaded collections to help diagnose missing select options
+                            try { console.log('/admin render: unis=', (normUnis||[]).length, 'facs=', (normFacs||[]).length, 'deps=', (normDeps||[]).length, 'cats=', (normCats||[]).length, 'events=', (normEvents||[]).length, 'anns=', (normAnns||[]).length); } catch(e){}
+
+                            return res.render('crud', {
+                                title: 'CRUD Operations',
+                                universities: normUnis,
+                                faculties: normFacs,
+                                departments: normDeps,
+                                categories: normCats,
+                                events: normEvents,
+                                announcements: normAnns
+                            });
                         });
                     });
                 });
