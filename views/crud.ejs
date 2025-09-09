@@ -229,7 +229,7 @@
                             <label class="form-label">คณะ</label>
                             <select id="event-faculty" class="form-control"></select>
                             <label class="form-label">สาขา</label>
-                            <input id="event-major" type="text" placeholder="สาขา (ถ้ามี)" class="form-control" />
+                            <select id="event-major" class="form-control"></select>
                             <label class="form-label">ประเภท (Category)</label>
                             <select id="event-category" class="form-control"></select>
                             <label class="form-label">Title</label>
@@ -272,13 +272,15 @@
     <!-- data container (JSON embedded safely in HTML attributes) -->
     <div id="__DATA__container" class="hidden"
          data-universities='<%- JSON.stringify(typeof universities !== "undefined" ? universities : []) %>'
-         data-faculties='<%- JSON.stringify(typeof faculties !== "undefined" ? faculties : []) %>'></div>
+         data-faculties='<%- JSON.stringify(typeof faculties !== "undefined" ? faculties : []) %>'
+         data-departments='<%- JSON.stringify(typeof departments !== "undefined" ? departments : []) %>'></div>
 
     <script>
         // parse embedded JSON from data container
         const __DATA_CONTAINER = document.getElementById('__DATA__container');
         const __UNIVERSITIES = JSON.parse(__DATA_CONTAINER?.getAttribute('data-universities') || '[]');
-        const __FACULTIES = JSON.parse(__DATA_CONTAINER?.getAttribute('data-faculties') || '[]');
+    const __FACULTIES = JSON.parse(__DATA_CONTAINER?.getAttribute('data-faculties') || '[]');
+    const __DEPARTMENTS = JSON.parse(__DATA_CONTAINER?.getAttribute('data-departments') || '[]');
 
         // normalize server data to a consistent client shape
         const _UNIS = (__UNIVERSITIES || []).map(u => ({
@@ -292,6 +294,13 @@
             id: String(f.ID ?? f.id ?? f.FacultyID ?? f.Faculty_ID ?? ''),
             name: String(f.name ?? f.Name ?? f.FacultyName ?? f.Faculty ?? '').trim(),
             universityId: String(f.University_ID ?? f.UniversityID ?? f.universityId ?? f.university ?? '')
+        }));
+
+        const _DEPS = (__DEPARTMENTS || []).map(d => ({
+            id: String(d.ID ?? d.id ?? ''),
+            name: String((d.name ?? d.Name ?? d.DepartmentName ?? d.Department) || '').trim(),
+            facultyId: String(d.Faculty_ID ?? d.FacultyId ?? d.facultyId ?? ''),
+            universityId: String(d.University_ID ?? d.UniversityId ?? d.universityId ?? '')
         }));
 
         // debug: log counts so you can inspect in browser console
@@ -312,12 +321,12 @@
             });
         }
 
-        // populate faculty select filtered by university id
+    // populate faculty select filtered by university id
         // fallback-aware faculty population: if embedded _FACS has no entries for the university,
         // attempt to fetch `/admin/faculties` (JSON) and repopulate once.
         let _FACS_fetchTried = false;
         async function populateFacultySelectForUniversity(sel, universityId){
-            sel.innerHTML = '<option value="">-- เลือกคณะ --</option>';
+            sel.innerHTML = '<option value="">-- ทุกคณะ --</option>';
             let found = 0;
             (_FACS || []).forEach(f => {
                 const include = !universityId || String(f.universityId) === String(universityId);
@@ -354,6 +363,22 @@
                     console.warn('Failed to fetch /admin/faculties fallback:', err);
                 }
             }
+        }
+
+        // populate department select filtered by university and faculty
+        function populateDepartmentSelectForFaculty(sel, universityId, facultyId){
+            if(!sel) return;
+            sel.innerHTML = '<option value="">-- ทุกสาขา --</option>';
+            (_DEPS || []).forEach(d => {
+                const matchUni = !universityId || String(d.universityId) === String(universityId);
+                const matchFac = !facultyId || String(d.facultyId) === String(facultyId);
+                if(matchUni && matchFac){
+                    const opt = document.createElement('option');
+                    opt.value = d.id;
+                    opt.textContent = d.name || 'Unknown';
+                    sel.appendChild(opt);
+                }
+            });
         }
 
         // Simple tab switching
@@ -407,6 +432,7 @@
     populateUniversitySelect(eventUniversitySelect);
     if(annUniversitySelect) populateUniversitySelect(annUniversitySelect);
     populateFacultySelectForUniversity(eventFacultySelect, '');
+    populateDepartmentSelectForFaculty(eventMajorInput, '', '');
         // categories (can be static or loaded from server)
         const CATEGORIES = ['OpenHouse','Academic','Social','Workshop','Seminar'];
         function populateCategorySelect(sel){
@@ -500,9 +526,13 @@
             uniWebsiteInput.value = '';
             facNameInput.value = '';
             deptNameInput.value = '';
+
+            //reset dept selects
+            if(deptFacultySelect) deptFacultySelect.innerHTML = '<option value="">-- เลือกคณะ --</option>';
+            
             // reset event inputs
             if(eventUniversitySelect) eventUniversitySelect.value = '';
-            if(eventFacultySelect) eventFacultySelect.innerHTML = '<option value="">-- เลือกคณะ --</option>';
+            if(eventFacultySelect) eventFacultySelect.innerHTML = '<option value="">-- ทุกคณะ --</option>';
             if(eventCategorySelect) eventCategorySelect.value = '';
             if(eventMajorInput) eventMajorInput.value = '';
             if(eventTitleInput) eventTitleInput.value = '';
@@ -556,6 +586,13 @@
         if(eventUniversitySelect){
             eventUniversitySelect.addEventListener('change', (e)=>{
                 populateFacultySelectForUniversity(eventFacultySelect, e.target.value);
+                populateDepartmentSelectForFaculty(eventMajorInput, e.target.value, eventFacultySelect.value || '');
+            });
+        }
+
+        if(eventFacultySelect){
+            eventFacultySelect.addEventListener('change', (e)=>{
+                populateDepartmentSelectForFaculty(eventMajorInput, eventUniversitySelect.value || '', e.target.value || '');
             });
         }
 
@@ -613,7 +650,7 @@
                         university: eventUniversitySelect.selectedOptions[0]?.textContent?.trim() || '',
                         facultyId: eventFacultySelect.value || '',
                         faculty: eventFacultySelect.selectedOptions[0]?.textContent?.trim() || '',
-                        major: eventMajorInput.value.trim() || '',
+                        major: eventMajorInput.selectedOptions && eventMajorInput.selectedOptions[0] ? eventMajorInput.selectedOptions[0].textContent.trim() : (eventMajorInput.value || ''),
                         title: eventTitleInput.value.trim() || '',
                         description: eventDescriptionInput.value.trim() || '',
                         location: eventLocationInput.value.trim() || '',
