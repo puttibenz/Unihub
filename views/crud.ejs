@@ -37,7 +37,7 @@
             </div>
             <table class="admin-table">
                 <thead>
-                    <tr><th>Name</th><th>Location</th><th>Website</th><th>Actions</th></tr>
+                    <tr><th>Name</th><th>Location</th><th>Website</th><th>Email</th><th>Contact</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                     <% const uniSample = (typeof universities !== 'undefined' && universities) ? universities : []; %>
@@ -46,7 +46,9 @@
                             <td><%= u.name || u.UniversityName || 'Unknown' %></td>
                             <td><%= u.location || u.Location || '-' %></td>
                             <td><%= u.website || u.Website || '-' %></td>
-                              <td class="actions"><button class="icon-btn" data-id="<%= u.id || '' %>" onclick="onEdit('university', this.dataset.id)">✎</button><button class="icon-btn" data-id="<%= u.id || '' %>" onclick="onDelete('university', this.dataset.id)">🗑</button></td>
+                            <td>A@example.com</td>
+                            <td>1234567890</td>
+                            <td class="actions"><button class="icon-btn" data-id="<%= u.id || '' %>" onclick="onEdit('university', this.dataset.id)">✎</button><button class="icon-btn" data-id="<%= u.id || '' %>" onclick="onDelete('university', this.dataset.id)">🗑</button></td>
                         </tr>
                     <% }) %>
                 </tbody>
@@ -63,7 +65,7 @@
             </div>
             <table class="admin-table">
                 <thead>
-                    <tr><th>Name</th><th>University</th><th>Actions</th></tr>
+                    <tr><th>Name</th><th>University</th><th>Email</th><th>Phone</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                     <% const facSample = (typeof faculties !== 'undefined' && faculties) ? faculties : []; %>
@@ -71,7 +73,9 @@
                         <tr>
                             <td><%= f.name || f.FacultyName || 'Unknown' %></td>
                             <td><%= f.university || f.University || '-' %></td>
-                              <td class="actions"><button class="icon-btn" data-id="<%= f.id || '' %>" onclick="onEdit('faculty', this.dataset.id)">✎</button><button class="icon-btn" data-id="<%= f.id || '' %>" onclick="onDelete('faculty', this.dataset.id)">🗑</button></td>
+                            <td>A@example.com</td>
+                            <td>1234567890</td>
+                            <td class="actions"><button class="icon-btn" data-id="<%= f.id || '' %>" onclick="onEdit('faculty', this.dataset.id)">✎</button><button class="icon-btn" data-id="<%= f.id || '' %>" onclick="onDelete('faculty', this.dataset.id)">🗑</button></td>
                         </tr>
                     <% }) %>
                 </tbody>
@@ -89,7 +93,7 @@
 
             <table class="admin-table">
                 <thead>
-                    <tr><th>Name</th><th>Faculty</th><th>University</th><th>Actions</th></tr>
+                    <tr><th>Name</th><th>Faculty</th><th>University</th><th>Email</th><th>Phone</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                     <% const depSample = (typeof departments !== 'undefined' && departments) ? departments : []; %>
@@ -98,9 +102,11 @@
                             <td><%= d.name || d.DepartmentName || 'Unknown' %></td>
                             <td><%= d.faculty || d.Faculty || '-' %></td>
                             <td><%= d.university || d.University || '-' %></td>
+                            <td>A@example.com</td>
+                            <td>1234567890</td>
                             <td class="actions">
-                            <button class="icon-btn" data-id="<%= d.id != null ? d.id : idx %>" onclick="onEdit('department', this.dataset.id)">✎</button>
-                            <button class="icon-btn" data-id="<%= d.id != null ? d.id : idx %>" onclick="onDelete('department', this.dataset.id)">🗑</button>
+                                <button class="icon-btn" data-id="<%= d.id != null ? d.id : idx %>" onclick="onEdit('department', this.dataset.id)">✎</button>
+                                <button class="icon-btn" data-id="<%= d.id != null ? d.id : idx %>" onclick="onDelete('department', this.dataset.id)">🗑</button>
                             </td>
                         </tr>
                     <% }) %>
@@ -202,6 +208,10 @@
                             <input id="uni-location" type="text" placeholder="เช่น กรุงเทพมหานคร" class="form-control" />
                             <label class="form-label">เว็บไซต์</label>
                             <input id="uni-website" type="url" placeholder="https://example.ac.th" class="form-control" />
+                            <label class="form-label">อีเมลติดต่อ</label>
+                            <input id="uni-email" type="email" placeholder="contact@example.ac.th" class="form-control" />
+                            <label class="form-label">เบอร์ติดต่อ</label>
+                            <input id="uni-contact" type="tel" placeholder="0xx-xxx-xxxx" class="form-control" />
                         </div>
 
                         <!-- Faculty -->
@@ -210,6 +220,10 @@
                             <select id="fac-university" class="form-control"></select>
                             <label class="form-label">ชื่อคณะ</label>
                             <input id="fac-name" type="text" placeholder="ชื่อคณะ" class="form-control" />
+                            <label class="form-label">อีเมลติดต่อ</label>
+                            <input id="fac-email" type="email" placeholder="contact@faculty.ac.th" class="form-control" />
+                            <label class="form-label">เบอร์โทรศัพท์</label>
+                            <input id="fac-phone" type="tel" placeholder="0xx-xxx-xxxx" class="form-control" />
                         </div>
 
                         <!-- Department -->
@@ -220,6 +234,10 @@
                             <select id="dept-faculty" class="form-control"></select>
                             <label class="form-label">ชื่อสาขา</label>
                             <input id="dept-name" type="text" placeholder="ชื่อสาขา" class="form-control" />
+                            <label class="form-label">อีเมลติดต่อ</label>
+                            <input id="dept-email" type="email" placeholder="contact@dept.ac.th" class="form-control" />
+                            <label class="form-label">เบอร์โทรศัพท์</label>
+                            <input id="dept-phone" type="tel" placeholder="0xx-xxx-xxxx" class="form-control" />
                         </div>
 
                         <!-- Event -->
@@ -406,11 +424,17 @@
         const uniNameInput = document.getElementById('uni-name');
         const uniLocationInput = document.getElementById('uni-location');
         const uniWebsiteInput = document.getElementById('uni-website');
+    const uniEmailInput = document.getElementById('uni-email');
+    const uniContactInput = document.getElementById('uni-contact');
         const facUniversitySelect = document.getElementById('fac-university');
         const facNameInput = document.getElementById('fac-name');
+    const facEmailInput = document.getElementById('fac-email');
+    const facPhoneInput = document.getElementById('fac-phone');
         const deptUniversitySelect = document.getElementById('dept-university');
         const deptFacultySelect = document.getElementById('dept-faculty');
         const deptNameInput = document.getElementById('dept-name');
+    const deptEmailInput = document.getElementById('dept-email');
+    const deptPhoneInput = document.getElementById('dept-phone');
     // Event inputs
     const eventUniversitySelect = document.getElementById('event-university');
     const eventFacultySelect = document.getElementById('event-faculty');
@@ -527,8 +551,14 @@
             uniNameInput.value = '';
             uniLocationInput.value = '';
             uniWebsiteInput.value = '';
+            uniEmailInput.value = '';
+            uniContactInput.value = '';
             facNameInput.value = '';
+            facEmailInput.value = '';
+            facPhoneInput.value = '';
             deptNameInput.value = '';
+            deptEmailInput.value = '';
+            deptPhoneInput.value = '';
 
             //reset dept selects
             if(deptFacultySelect) deptFacultySelect.innerHTML = '<option value="">-- เลือกคณะ --</option>';
