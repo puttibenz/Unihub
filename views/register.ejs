@@ -30,6 +30,20 @@
                             <input type="email" id="email" name="email" placeholder="เช่น student@example.com" required>
                         </div>
                         <div class="form-group">
+                            <label for="phone">เบอร์ติดต่อ</label>
+                            <input type="text" id="phone" name="phone" placeholder="เช่น 012-345-6789" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-type">ประเภทผู้ใช้</label>
+                                <select id="user-type" name="user-type" class="form-control" required>
+                                    <option value="">-- โปรดเลือกประเภทผู้ใช้ --</option>
+                                    <option value="student">นักเรียน</option>
+                                    <option value="university_student">นักศึกษา</option>
+                                    <option value="staff">บุคลากรทั่วไป</option>
+                                    <option value="teacher">ครู/อาจารย์</option>
+                                </select>
+                        </div>
+                        <div class="form-group">
                             <label for="password">รหัสผ่าน</label>
                             <input type="password" id="password" name="password" placeholder="ตั้งรหัสผ่านที่แข็งแรง" required>
                         </div>
