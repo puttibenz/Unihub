@@ -123,7 +123,42 @@
         </div>
     </section>
 
+    
+
     <!-- <%- include('partials/footer') %> -->
+
+    <!-- Join confirmation modal -->
+    <div id="join-modal" class="hidden" aria-hidden="true">
+        <div class="modal-backdrop"></div>
+        <div class="join-modal-box">
+            <h2 id="join-modal-title">คุณต้องการเข้าร่วมกิจกรรมนี้หรือไม่ ?</h2>
+            <div class="join-modal-actions">
+                <button id="join-confirm" class="btn btn-gradient">ตกลง</button>
+                <button id="join-cancel" class="btn btn-secondary">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join success modal (QR + details) -->
+    <div id="join-success-modal" class="hidden" aria-hidden="true">
+        <div class="modal-backdrop"></div>
+        <div class="join-success-box">
+            <div class="success-header">
+                <h2>คุณได้เข้าร่วมกิจกรรมเรียบร้อย</h2>
+                <div class="success-check"><i class="fas fa-check"></i></div>
+            </div>
+            <div class="success-body">
+                <img id="success-qr" src="" alt="QR code" class="success-qr">
+                <hr>
+                <p class="success-line"><strong>Event Name:</strong> <span id="success-event-name"></span></p>
+                <p class="success-line"><strong>Location:</strong> <span id="success-location"></span></p>
+                <p class="success-line"><strong>Start Time - End Time:</strong> <span id="success-time"></span></p>
+            </div>
+            <div class="success-actions">
+                <button id="success-back" class="btn btn-gradient">กลับสู่หน้าหลัก</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         (function(){
@@ -169,6 +204,97 @@
             });
 
             applyFilters();
+        })();
+
+        // join modal handlers
+        (function(){
+            const joinModal = document.getElementById('join-modal');
+            const joinTitle = document.getElementById('join-modal-title');
+            const joinConfirm = document.getElementById('join-confirm');
+            const joinCancel = document.getElementById('join-cancel');
+
+            const successModal = document.getElementById('join-success-modal');
+            const successQR = document.getElementById('success-qr');
+            const successName = document.getElementById('success-event-name');
+            const successLocation = document.getElementById('success-location');
+            const successTime = document.getElementById('success-time');
+            const successBack = document.getElementById('success-back');
+
+            let currentEvent = null;
+
+            function openModalForCard(card){
+                const title = card ? (card.querySelector('.card-header h3')?.textContent || '') : '';
+                const dateP = card ? card.querySelector('.card-body p i.fa-calendar-alt')?.parentNode : null;
+                const timeP = card ? card.querySelector('.card-body p i.fa-clock')?.parentNode : null;
+                const locP = card ? card.querySelector('.card-body p i.fa-map-marker-alt')?.parentNode : null;
+                const dateText = dateP ? dateP.textContent.replace(/\s+/g,' ').trim() : '';
+                const timeText = timeP ? timeP.textContent.replace(/\s+/g,' ').trim() : '';
+                const locText = locP ? locP.textContent.replace(/\s+/g,' ').trim() : '';
+
+                currentEvent = {
+                    title: title,
+                    date: dateText,
+                    time: timeText,
+                    location: locText
+                };
+
+                
+                if(joinTitle) joinTitle.textContent = 'คุณต้องการเข้าร่วม "' + currentEvent.title + '" หรือไม่ ?';
+                if(joinModal)
+                { 
+                    joinModal.classList.remove('hidden'); 
+                    joinModal.setAttribute('aria-hidden','false'); 
+                    document.documentElement.classList.add('modal-open'); 
+                }
+            }
+
+            function closeJoinModal(){ 
+                if(joinModal)
+                { 
+                    joinModal.classList.add('hidden'); 
+                    joinModal.setAttribute('aria-hidden','true'); 
+                    document.documentElement.classList.remove('modal-open'); 
+                } 
+            }
+            function openSuccessModal(){ 
+                if(successModal)
+                { 
+                    successModal.classList.remove('hidden'); 
+                    successModal.setAttribute('aria-hidden','false'); 
+                    document.documentElement.classList.add('modal-open'); 
+                } 
+            }
+            function closeSuccessModal(){ 
+                if(successModal){ successModal.classList.add('hidden'); successModal.setAttribute('aria-hidden','true'); document.documentElement.classList.remove('modal-open'); } 
+            }
+
+            document.querySelectorAll('.card .card-footer .btn').forEach(btn => {
+                btn.addEventListener('click', function(e){
+                    const card = e.target.closest('.card');
+                    openModalForCard(card);
+                });
+            });
+
+            if(joinCancel) joinCancel.addEventListener('click', closeJoinModal);
+
+            if(joinConfirm) joinConfirm.addEventListener('click', function(){
+                // close confirmation modal
+                closeJoinModal();
+
+                // populate and open success modal
+                if(currentEvent){
+                    // build a small payload for QR (encode title + date + location)
+                    const payload = JSON.stringify({ title: currentEvent.title, date: currentEvent.date, time: currentEvent.time, location: currentEvent.location });
+                    const qrUrl = 'https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=' + encodeURIComponent(payload) + '&chld=L|1';
+                    if(successQR) successQR.src = qrUrl;
+                    if(successName) successName.textContent = currentEvent.title || '-';
+                    if(successLocation) successLocation.textContent = currentEvent.location || '-';
+                    if(successTime) successTime.textContent = currentEvent.time || '-';
+                }
+                openSuccessModal();
+            });
+
+            if(successBack) successBack.addEventListener('click', function(){ closeSuccessModal(); });
         })();
     </script>
 </body>
