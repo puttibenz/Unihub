@@ -127,39 +127,6 @@
 
     <!-- <%- include('partials/footer') %> -->
 
-    <!-- Join confirmation modal -->
-    <div id="join-modal" class="hidden" aria-hidden="true">
-        <div class="modal-backdrop"></div>
-        <div class="join-modal-box">
-            <h2 id="join-modal-title">คุณต้องการเข้าร่วมกิจกรรมนี้หรือไม่ ?</h2>
-            <div class="join-modal-actions">
-                <button id="join-confirm" class="btn btn-gradient">ตกลง</button>
-                <button id="join-cancel" class="btn btn-secondary">ยกเลิก</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Join success modal (QR + details) -->
-    <div id="join-success-modal" class="hidden" aria-hidden="true">
-        <div class="modal-backdrop"></div>
-        <div class="join-success-box">
-            <div class="success-header">
-                <h2>คุณได้เข้าร่วมกิจกรรมเรียบร้อย</h2>
-                <div class="success-check"><i class="fas fa-check"></i></div>
-            </div>
-            <div class="success-body">
-                <img id="success-qr" src="" alt="QR code" class="success-qr">
-                <hr>
-                <p class="success-line"><strong>Event Name:</strong> <span id="success-event-name"></span></p>
-                <p class="success-line"><strong>Location:</strong> <span id="success-location"></span></p>
-                <p class="success-line"><strong>Start Time - End Time:</strong> <span id="success-time"></span></p>
-            </div>
-            <div class="success-actions">
-                <button id="success-back" class="btn btn-gradient">กลับสู่หน้าหลัก</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         (function(){
             const searchInput = document.getElementById('search-input');
