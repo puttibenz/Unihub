@@ -6,7 +6,7 @@ const router = express.Router();
 // Route: หน้าแสดงกิจกรรม
 router.get('/event', (req, res) => {
     // fetch events from DB and render the event page
-    const sql = `SELECT e.ID as id, e.Title as title, e.description as description, e.location as location, e.start_time as start_time, e.end_date as end_time, c.Name as tag, u.Name as university, f.Name as faculty, d.Name as department
+    const sql = `SELECT e.ID as id, e.Title as title, e.description as description, e.location as location, e.start_time as start_time, e.end_time as end_time, c.Name as tag, u.Name as university, f.Name as faculty, d.Name as department
                  FROM events e
                  LEFT JOIN category c ON e.category_ID = c.ID
                  LEFT JOIN university u ON e.university_ID = u.ID

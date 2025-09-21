@@ -72,7 +72,7 @@ router.get('/admin', (req, res) => {
                     }
                     const normCats = (catsRows || []).map(c => ({ id: c.id, name: c.name }));
 
-                    const eventsSql = `SELECT e.ID as id, e.Title as title, e.description as description, e.location as location, e.start_time as start_time, e.end_date as end_time, c.Name as category, u.Name as university, f.Name as faculty, d.Name as department
+                    const eventsSql = `SELECT e.ID as id, e.Title as title, e.description as description, e.location as location, e.start_time as start_time, e.end_time as end_time, c.Name as category, u.Name as university, f.Name as faculty, d.Name as department
                                        FROM events e
                                        LEFT JOIN category c ON e.category_ID = c.ID
                                        LEFT JOIN university u ON e.university_ID = u.ID
@@ -375,7 +375,7 @@ router.post('/admin/events', (req, res) => {
                     }
 
                     const sql = `INSERT INTO events
-                        (Title, description, location, start_time, end_date, category_ID, university_ID, faculty_ID, Department_ID)
+                        (Title, description, location, start_time, end_time, Category_ID, University_ID, Faculty_ID, Department_ID)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
                     const params = [
                         title,
