@@ -1,0 +1,95 @@
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+
+	<div class="container">
+		<div class="q-header">
+			<h1>Q&A</h1>
+			<!-- placeholder for filter/search in future -->
+			<div class="header-actions"></div>
+		</div>
+
+		<section id="ask-section" class="ask-inline">
+			<button id="open-ask-modal" class="btn btn-primary ask-btn" type="button">+ Ask Question</button>
+		</section>
+
+		<!-- Modal -->
+		<div id="ask-modal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="askModalTitle" aria-modal="true">
+			<div class="modal-overlay" data-close="modal"></div>
+			<div class="modal-dialog" role="document">
+				<div class="modal-header">
+					<h3 id="askModalTitle">ถามคำถาม</h3>
+					<button type="button" class="modal-close" aria-label="Close" data-close="modal">×</button>
+				</div>
+				<form id="question-form" class="modal-body">
+					<label class="f-label">หัวข้อคำถาม
+						<input type="text" id="q-title" placeholder="เช่น วิธีเตรียมตัวสอบ?" required />
+					</label>
+					<label class="f-label">รายละเอียดคำถาม
+						<textarea id="q-body" rows="5" placeholder="อธิบายรายละเอียดเพิ่มเติม..." required></textarea>
+					</label>
+					<label class="f-label">ชื่อ (ตัวเลือก)
+						<input type="text" id="q-author" placeholder="เช่น Alice" />
+					</label>
+					<div class="modal-actions">
+						<button type="button" class="btn ghost" data-close="modal">ยกเลิก</button>
+						<button type="submit" class="btn btn-primary">โพสต์คำถาม</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<section id="questions-list">
+			<% if (questions && questions.length) { %>
+				<% questions.forEach(function(q){ %>
+					<article class="question" data-id="<%= q.id %>">
+						<div class="tags">
+							<% if (q.tags) { q.tags.forEach(function(t){ %>
+								<span class="tag"><%= t %></span>
+							<% }) } %>
+						</div>
+						<div class="title"><%= q.title %></div>
+						<div class="meta-row">
+							<div class="meta">โดย <%= q.author %></div>
+							<div class="meta"><%= q.createdAt %></div>
+							<div class="meta"><%= q.views || 0 %> views</div>
+						</div>
+						<div class="q-stats">
+							<div class="stat like-btn" data-likes="<%= q.likes || 0 %>">❤️ <span class="like-count"><%= q.likes || 0 %></span></div>
+							<div class="stat answers-count" data-answers="<%= (q.answers && q.answers.length) || 0 %>">💬 <span class="ans-count"><%= (q.answers && q.answers.length) || 0 %></span> Answers</div>
+							<button class="answer-toggle btn-outline" type="button">Answer</button>
+						</div>
+						<div class="body"><p><%= q.body %></p></div>
+
+						<div class="answers" data-expanded="false">
+							<h4>คำตอบ</h4>
+							<% if (q.answers && q.answers.length) { %>
+								<% q.answers.forEach(function(a){ %>
+									<div class="answer">
+										<div class="meta"><%= a.author %> • <%= a.createdAt %></div>
+										<div class="body"><%= a.body %></div>
+									</div>
+								<% }) %>
+							<% } else { %>
+								<div class="no-answers">ยังไม่มีคำตอบ</div>
+							<% } %>
+							<div class="answer-form-wrapper" hidden>
+								<form class="answer-form" data-qid="<%= q.id %>">
+									<textarea class="answer-editor" name="answer" rows="3" placeholder="Write your answer..." required></textarea>
+									<div class="answer-actions">
+										<button type="button" class="btn-cancel-answer" data-action="cancel-answer">Cancel</button>
+										<button type="submit" class="btn-post-answer">Post Answer</button>
+									</div>
+									<input type="text" name="author" class="answer-author-input" placeholder="ชื่อ (ตัวเลือก)" />
+								</form>
+							</div>
+						</div>
+					</article>
+				<% }) %>
+			<% } else { %>
+				<p class="no-answers">ยังไม่มีคำถาม</p>
+			<% } %>
+		</section>
+	</div>
+
+	<script src="/js/question.js"></script>
+<%- include('partials/footer') %>

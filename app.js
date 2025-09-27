@@ -12,6 +12,7 @@ const universitiesRoutes = require('./routes/universities');
 const profileRoutes = require('./routes/profile');
 const announcementRoutes = require('./routes/announcement');
 const crudRoutes = require('./routes/admin');    
+const questionRoutes = require('./routes/question');
 
 const db = require('./db'); // นำเข้าโมดูล db.js
 
@@ -47,6 +48,7 @@ app.use('/', universitiesRoutes);
 app.use('/', profileRoutes);
 app.use('/', announcementRoutes);
 app.use('/', crudRoutes);
+app.use('/', questionRoutes);
 
 app.listen(3000, () => {
     console.log('Server is running')
