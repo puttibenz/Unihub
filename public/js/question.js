@@ -40,45 +40,51 @@ document.addEventListener('DOMContentLoaded', function() {
 		e.preventDefault();
 		const title = document.getElementById('q-title').value.trim();
 		const body = document.getElementById('q-body').value.trim();
-		const author = document.getElementById('q-author').value.trim() || 'Anonymous';
-		if (!title || !body) return;
-
-		// create a new question element and prepend
-		const id = 'q_' + Date.now();
-		const article = document.createElement('article');
-		article.className = 'question';
-		article.setAttribute('data-id', id);
-		article.innerHTML = `
-			<div class="tags"></div>
-			<div class="title">${escapeHtml(title)}</div>
-			<div class="meta-row">
-				<div class="meta">โดย ${escapeHtml(author)}</div>
-				<div class="meta">${formatDate(new Date())}</div>
-				<div class="meta">0 views</div>
-			</div>
-			<div class="q-stats">
-				<div class="stat like-btn" data-likes="0">❤️ <span class="like-count">0</span></div>
-				<div class="stat answers-count" data-answers="0">💬 <span class="ans-count">0</span> Answers</div>
-			</div>
-			<div class="body"><p>${escapeHtml(body)}</p></div>
-			<div class="answers">
-				<h4>คำตอบ</h4>
-				<div class="no-answers">ยังไม่มีคำตอบ</div>
-				<form class="answer-form" data-qid="${id}">
-					<textarea name="answer" rows="2" placeholder="เขียนคำตอบ..." required></textarea>
-					<input type="text" name="author" placeholder="ชื่อ (ตัวเลือก)" />
-					<button type="submit">เพิ่มคำตอบ</button>
-				</form>
-			</div>
-		`;
-
-		// insert at top
-		const first = questionsList.firstChild;
-		questionsList.insertBefore(article, first);
-
-		// clear form
-		qForm.reset();
-		closeModal();
+		if(!title || !body) return;
+		fetch('/api/posts', {
+			method:'POST',
+			headers:{'Content-Type':'application/json'},
+			body: JSON.stringify({ title, body })
+		}).then(r=>r.json()).then(data=>{
+			if(data.error){ alert(data.error); return; }
+			const article = document.createElement('article');
+			article.className='question';
+			article.setAttribute('data-id', data.id);
+			article.innerHTML = `
+				<div class="tags"></div>
+				<div class="title">${escapeHtml(data.title)}</div>
+				<div class="meta-row">
+					<div class="meta">โดย ${escapeHtml(data.author||'Anonymous')}</div>
+					<div class="meta">${escapeHtml(data.createdAt)}</div>
+					<div class="meta">0 views</div>
+				</div>
+				<div class="q-stats">
+					<div class="stat like-btn" data-likes="0">❤️ <span class="like-count">0</span></div>
+					<div class="stat answers-count" data-answers="0">💬 <span class="ans-count">0</span> Answers</div>
+					<button class="answer-toggle btn-outline" type="button">Answer</button>
+				</div>
+				<div class="body"><p>${escapeHtml(data.body)}</p></div>
+				<div class="answers" data-expanded="false">
+					<h4>คำตอบ</h4>
+					<div class="no-answers">ยังไม่มีคำตอบ</div>
+					<div class="answer-form-wrapper" hidden>
+						<form class="answer-form" data-qid="${data.id}">
+							<textarea class="answer-editor" name="answer" rows="3" placeholder="Write your answer..." required></textarea>
+							<div class="answer-actions">
+								<button type="button" class="btn-cancel-answer" data-action="cancel-answer">Cancel</button>
+								<button type="submit" class="btn-post-answer">Post Answer</button>
+							</div>
+							<input type="text" name="author" class="answer-author-input" placeholder="ชื่อ (ตัวเลือก)" />
+						</form>
+					</div>
+				</div>`;
+			questionsList.insertBefore(article, questionsList.firstChild);
+			qForm.reset();
+			closeModal();
+		}).catch(err=>{
+			console.error(err);
+			alert('Error creating question');
+		});
 	});
 
 	// delegate answer form submissions
@@ -88,28 +94,36 @@ document.addEventListener('DOMContentLoaded', function() {
 			const form = e.target;
 			const qid = form.getAttribute('data-qid');
 			const answerText = form.querySelector('textarea[name="answer"]').value.trim();
-			const author = form.querySelector('input[name="author"]').value.trim() || 'Anonymous';
 			if (!answerText) return;
-
-			const parent = form.parentElement;
-			// remove no-answers if exists
-			const noAns = parent.querySelector('.no-answers');
-			if (noAns) noAns.remove();
-
-			const div = document.createElement('div');
-			div.className = 'answer';
-			div.innerHTML = `<div class="meta">${escapeHtml(author)} • ${formatDate(new Date())}</div><div class="body">${escapeHtml(answerText)}</div>`;
-			parent.insertBefore(div, form);
-
-			form.reset();
-
-			// update answer count in stats row (if exists)
-			const questionEl = form.closest('.question');
-			const ansCountEl = questionEl?.querySelector('.ans-count');
-			if(ansCountEl){
-				const current = parseInt(ansCountEl.textContent || '0',10) + 1;
-				ansCountEl.textContent = current;
-			}
+			fetch(`/api/posts/${qid}/comments`, {
+				method:'POST',
+				headers:{'Content-Type':'application/json'},
+				body: JSON.stringify({ body: answerText })
+			}).then(r=>r.json()).then(data=>{
+				if(data.error){ alert(data.error); return; }
+				// Correct container for answers is the .answers block, not the wrapper of the form
+				const answersBlock = form.closest('.answers');
+				const wrapper = form.closest('.answer-form-wrapper');
+				if(!answersBlock || !wrapper){ return; }
+				// Remove placeholder 'no answers' (it's a sibling of wrapper)
+				const noAns = answersBlock.querySelector('.no-answers');
+				if (noAns) noAns.remove();
+				const div = document.createElement('div');
+				div.className = 'answer';
+				div.innerHTML = `<div class="meta">${escapeHtml(data.author)} • ${escapeHtml(data.createdAt)}</div><div class="body">${escapeHtml(data.body)}</div>`;
+				// Insert new answer before the form wrapper (so form stays at bottom)
+				answersBlock.insertBefore(div, wrapper);
+				form.reset();
+				const questionEl = form.closest('.question');
+				const ansCountEl = questionEl?.querySelector('.ans-count');
+				if(ansCountEl){
+					const current = parseInt(ansCountEl.textContent || '0',10) + 1;
+					ansCountEl.textContent = current;
+				}
+			}).catch(err=>{
+				console.error(err);
+				alert('Error posting answer');
+			});
 		}
 	});
 

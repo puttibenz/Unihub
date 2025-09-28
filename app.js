@@ -14,6 +14,7 @@ const announcementRoutes = require('./routes/announcement');
 const crudRoutes = require('./routes/admin');    
 const questionRoutes = require('./routes/question');
 
+
 const db = require('./db'); // นำเข้าโมดูล db.js
 
 // Configure admin emails (comma-separated) via environment variable
@@ -50,6 +51,7 @@ app.use('/', announcementRoutes);
 app.use('/', crudRoutes);
 app.use('/', questionRoutes);
 
+// Initialize core tables (Post, Comment) once server starts
 app.listen(3000, () => {
     console.log('Server is running')
 })
