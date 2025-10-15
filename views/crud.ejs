@@ -45,8 +45,8 @@
                                     <td><%= u.name || u.UniversityName || 'Unknown' %></td>
                                     <td><%= u.location || u.Location || '-' %></td>
                                     <td><%= u.website || u.Website || '-' %></td>
-                                    <td>A@example.com</td>
-                                    <td>1234567890</td>
+                                    <td><%= u.email || u.Email || '-' %></td>
+                                    <td><%= u.phone || u.Phone || '-' %></td>
                                     <td class="actions"><button class="icon-btn" data-id="<%= u.id || '' %>" onclick="onEdit('university', this.dataset.id)">✎</button><button class="icon-btn" data-id="<%= u.id || '' %>" onclick="onDelete('university', this.dataset.id)">🗑</button></td>
                                 </tr>
                             <% }) %>
@@ -72,8 +72,8 @@
                                 <tr>
                                     <td><%= f.name || f.FacultyName || 'Unknown' %></td>
                                     <td><%= f.university || f.University || '-' %></td>
-                                    <td>A@example.com</td>
-                                    <td>1234567890</td>
+                                    <td><%= f.email || f.Email || '-' %></td>
+                                    <td><%= f.phone || f.Phone || '-' %></td>
                                     <td class="actions"><button class="icon-btn" data-id="<%= f.id || '' %>" onclick="onEdit('faculty', this.dataset.id)">✎</button><button class="icon-btn" data-id="<%= f.id || '' %>" onclick="onDelete('faculty', this.dataset.id)">🗑</button></td>
                                 </tr>
                             <% }) %>
@@ -101,8 +101,8 @@
                                     <td><%= d.name || d.DepartmentName || 'Unknown' %></td>
                                     <td><%= d.faculty || d.Faculty || '-' %></td>
                                     <td><%= d.university || d.University || '-' %></td>
-                                    <td>A@example.com</td>
-                                    <td>1234567890</td>
+                                    <td><%= d.email || d.Email || '-' %></td>
+                                    <td><%= d.phone || d.Phone || '-' %></td>
                                     <td class="actions">
                                         <button class="icon-btn" data-id="<%= d.id != null ? d.id : idx %>" onclick="onEdit('department', this.dataset.id)">✎</button>
                                         <button class="icon-btn" data-id="<%= d.id != null ? d.id : idx %>" onclick="onDelete('department', this.dataset.id)">🗑</button>
@@ -293,7 +293,7 @@
                 data-departments='<%- JSON.stringify(typeof departments !== "undefined" ? departments : []) %>'
                 data-categories='<%- JSON.stringify(typeof categories !== "undefined" ? categories : []) %>'></div>
 
-        <script src="public/js/crud.js"></script>
+        <script src="/js/crud.js"></script>
     </body>
 </html>
 

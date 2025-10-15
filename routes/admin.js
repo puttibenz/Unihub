@@ -7,7 +7,8 @@ router.use(express.json());
 // render admin page with data from DB so the frontend can embed lists
 router.get('/admin', (req, res) => {
     // fetch universities
-    const sqlUnis = 'SELECT ID, Name, Location, Website FROM university ORDER BY Name';
+    // `university` table stores contact number in column `Contact` (not Phone)
+    const sqlUnis = 'SELECT ID, Name, Location, Website, Email, Contact FROM university ORDER BY Name';
     db.query(sqlUnis, (err, unis) => {
         if (err) {
             console.error('DB select universities error:', err);
@@ -15,10 +16,10 @@ router.get('/admin', (req, res) => {
         }
 
         // fetch faculties
-        const sqlFacs = `SELECT f.ID, f.Name, f.University_ID, u.Name as UniversityName 
-                        FROM faculty f 
-                        JOIN university u ON f.University_ID = u.ID 
-                        ORDER BY f.Name`;
+    const sqlFacs = `SELECT f.ID, f.Name, f.University_ID, f.Email as Email, f.Phone as Phone, u.Name as UniversityName 
+            FROM faculty f 
+            JOIN university u ON f.University_ID = u.ID 
+            ORDER BY f.Name`;
         db.query(sqlFacs, (err2, facs) => {
             if (err2) {
                 console.error('DB select faculties error:', err2);
@@ -26,7 +27,7 @@ router.get('/admin', (req, res) => {
             }
 
             // fetch departments joined with faculty/university names (useful for rendering table)
-            const sqlDeps = `SELECT d.ID as ID, d.Name as Name, d.Faculty_ID as Faculty_ID, f.Name as FacultyName, f.University_ID as University_ID, u.Name as UniversityName
+            const sqlDeps = `SELECT d.ID as ID, d.Name as Name, d.Faculty_ID as Faculty_ID, d.Email as Email, d.Phone as Phone, f.Name as FacultyName, f.University_ID as University_ID, u.Name as UniversityName
                              FROM department d
                              JOIN faculty f ON d.Faculty_ID = f.ID
                              JOIN university u ON f.University_ID = u.ID
@@ -43,7 +44,10 @@ router.get('/admin', (req, res) => {
                     id: u.ID ?? u.id,
                     name: u.Name ?? u.name,
                     location: u.Location ?? u.location,
-                    website: u.Website ?? u.website
+                    website: u.Website ?? u.website,
+                    email: u.Email ?? u.email ?? null,
+                    // map Contact -> phone for client/template compatibility; fall back to Phone if present
+                    phone: u.Contact ?? u.contact ?? u.Phone ?? u.phone ?? null
                 }));
 
                 const normFacs = (facs || []).map(f => ({
@@ -51,7 +55,9 @@ router.get('/admin', (req, res) => {
                     name: f.Name ?? f.name,
                     // include universityId so client can filter faculties by selected university
                     universityId: (f.University_ID ?? f.UniversityId ?? f.universityId ?? null),
-                    university: f.UniversityName ?? f.University ?? f.university
+                    university: f.UniversityName ?? f.University ?? f.university,
+                    email: f.Email ?? f.email ?? null,
+                    phone: f.Phone ?? f.phone ?? null
                 }));
 
                 const normDeps = (deps || []).map(d => ({
@@ -60,7 +66,9 @@ router.get('/admin', (req, res) => {
                     facultyId: d.Faculty_ID ?? d.FacultyId ?? d.facultyId,
                     faculty: d.FacultyName ?? d.Faculty ?? d.faculty,
                     universityId: d.University_ID ?? d.UniversityId ?? d.universityId,
-                    university: d.UniversityName ?? d.University ?? d.university
+                    university: d.UniversityName ?? d.University ?? d.university,
+                    email: d.Email ?? d.email ?? null,
+                    phone: d.Phone ?? d.phone ?? null
                 }));
 
                 // fetch categories as well, then fetch events and announcements to embed into the admin page
@@ -153,14 +161,26 @@ router.get('/admin/faculties', (req, res) => {
 
 //Post /admin/universities
 router.post('/admin/universities', (req, res) => {
-    const { name, location, website } = req.body;
+    // log incoming body to help diagnose missing fields from the client
+    try { console.log('POST /admin/universities body:', req.body); } catch (e) {}
 
-    db.query('INSERT INTO university (Name, Location, Website) VALUES (?, ?, ?)', [name, location, website], (err, result) => {
+    const name = (req.body.name ?? req.body.Name ?? '').trim();
+    const location = req.body.location ?? req.body.Location ?? null;
+    const website = req.body.website ?? req.body.Website ?? null;
+    // accept either `phone` or `contact` keys from client
+    const emailVal = req.body.email ?? req.body.Email ?? null;
+    const contactVal = req.body.phone ?? req.body.contact ?? req.body.Contact ?? null;
+
+    if (!name) return res.status(400).json({ success: false, message: 'University name is required' });
+
+    db.query('INSERT INTO university (Name, Location, Website, Email, Contact) VALUES (?, ?, ?, ?, ?)', [name, location, website, emailVal, contactVal], (err, result) => {
         if (err) {
             console.error('Error inserting university:', err);
             return res.status(500).json({ success: false, message: 'Error inserting university' });
         }
-        return res.status(201).json({ success: true, id: result.insertId });
+        // log what was stored for easier debugging
+        try { console.log('Inserted university id=%s email=%s contact=%s', result.insertId, emailVal, contactVal); } catch (e) {}
+        return res.status(201).json({ success: true, id: result.insertId, email: emailVal, contact: contactVal });
     });
 });
 
@@ -168,12 +188,12 @@ router.post('/admin/universities', (req, res) => {
 router.post('/admin/faculties', (req, res) => {
     // accept either `university` or `University` in request body
     const uniRaw = req.body.university ?? req.body.University;
-    const { name } = req.body;
+    const { name, email, phone } = req.body;
     if(!name) return res.status(400).json({ success:false, message:'Faculty name is required' });
 
     // helper to insert once we have universityId
     function insertFacultyWithUniversityId(universityId){
-        db.query('INSERT INTO faculty (University_ID, Name) VALUES (?, ?)', [universityId, name ], (err, result) => {
+        db.query('INSERT INTO faculty (University_ID, Name, Email, Phone) VALUES (?, ?, ?, ?)', [universityId, name, email || null, phone || null ], (err, result) => {
             if (err) {
                 console.error('Error inserting faculty:', err);
                 return res.status(500).json({ success:false, message:'Error inserting faculty' });
@@ -242,8 +262,8 @@ router.post('/admin/departments', (req, res) => {
             const facultyId = facRow.ID ?? facRow.id ?? facRow.FacultyID ?? facRow.Faculty_ID;
             if (!facultyId) return res.status(500).json({ success:false, message:'Faculty record missing id' });
 
-            // insert department (assumes department table has Faculty_ID and Name columns)
-            db.query('INSERT INTO department (Faculty_ID, Name) VALUES (?, ?)', [facultyId, name], (err3, result) => {
+            // insert department (supports Email and Phone columns if present)
+            db.query('INSERT INTO department (Faculty_ID, Name, Email, Phone) VALUES (?, ?, ?, ?)', [facultyId, name, req.body.email || null, req.body.phone || null], (err3, result) => {
                 if (err3) {
                     console.error('Error inserting department:', err3);
                     return res.status(500).json({ success:false, message:'Error inserting department' });
@@ -375,7 +395,7 @@ router.post('/admin/events', (req, res) => {
                     }
 
                     const sql = `INSERT INTO events
-                        (Title, description, location, start_time, end_time, Category_ID, University_ID, Faculty_ID, Department_ID)
+                        (Title, description, location, start_time, end_date, Category_ID, University_ID, Faculty_ID, Department_ID)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
                     const params = [
                         title,
@@ -480,6 +500,189 @@ router.post('/admin/announcements', (req, res) => {
     });
 });
 
+// --- Admin update/delete endpoints for UI actions ---
+// Update university
+router.put('/admin/universities/:id', (req, res) => {
+    const id = Number(req.params.id || 0);
+    if (!id) return res.status(400).json({ success: false, message: 'Invalid university id' });
+
+    const name = (req.body.name ?? req.body.Name ?? '').trim();
+    const location = req.body.location ?? req.body.Location ?? null;
+    const website = req.body.website ?? req.body.Website ?? null;
+    const emailVal = req.body.email ?? req.body.Email ?? null;
+    const contactVal = req.body.phone ?? req.body.contact ?? req.body.Contact ?? null;
+
+    db.query('UPDATE university SET Name = ?, Location = ?, Website = ?, Email = ?, Contact = ? WHERE ID = ?', [name, location, website, emailVal, contactVal, id], (err, result) => {
+        if (err) {
+            console.error('Error updating university:', err);
+            return res.status(500).json({ success: false, message: 'Error updating university' });
+        }
+        return res.json({ success: true, rowsAffected: result.affectedRows });
+    });
+});
+
+// Delete university
+router.delete('/admin/universities/:id', (req, res) => {
+    const id = Number(req.params.id || 0);
+    if (!id) return res.status(400).json({ success: false, message: 'Invalid university id' });
+    db.query('DELETE FROM university WHERE ID = ?', [id], (err, result) => {
+        if (err) {
+            console.error('Error deleting university:', err);
+            return res.status(500).json({ success: false, message: 'Error deleting university' });
+        }
+        return res.json({ success: true, rowsAffected: result.affectedRows });
+    });
+});
+
+// Update faculty
+router.put('/admin/faculties/:id', (req, res) => {
+    const id = Number(req.params.id || 0);
+    if (!id) return res.status(400).json({ success: false, message: 'Invalid faculty id' });
+    const name = (req.body.name ?? req.body.Name ?? '').trim();
+    const emailVal = req.body.email ?? req.body.Email ?? null;
+    const phoneVal = req.body.phone ?? req.body.Phone ?? null;
+    db.query('UPDATE faculty SET Name = ?, Email = ?, Phone = ? WHERE ID = ?', [name, emailVal, phoneVal, id], (err, result) => {
+        if (err) {
+            console.error('Error updating faculty:', err);
+            return res.status(500).json({ success: false, message: 'Error updating faculty' });
+        }
+        return res.json({ success: true, rowsAffected: result.affectedRows });
+    });
+});
+
+// Delete faculty
+router.delete('/admin/faculties/:id', (req, res) => {
+    const id = Number(req.params.id || 0);
+    if (!id) return res.status(400).json({ success: false, message: 'Invalid faculty id' });
+    db.query('DELETE FROM faculty WHERE ID = ?', [id], (err, result) => {
+        if (err) {
+            console.error('Error deleting faculty:', err);
+            return res.status(500).json({ success: false, message: 'Error deleting faculty' });
+        }
+        return res.json({ success: true, rowsAffected: result.affectedRows });
+    });
+});
+
+// Update department
+router.put('/admin/departments/:id', (req, res) => {
+    const id = Number(req.params.id || 0);
+    if (!id) return res.status(400).json({ success: false, message: 'Invalid department id' });
+    const name = (req.body.name ?? req.body.Name ?? '').trim();
+    const emailVal = req.body.email ?? req.body.Email ?? null;
+    const phoneVal = req.body.phone ?? req.body.Phone ?? null;
+    db.query('UPDATE department SET Name = ?, Email = ?, Phone = ? WHERE ID = ?', [name, emailVal, phoneVal, id], (err, result) => {
+        if (err) {
+            console.error('Error updating department:', err);
+            return res.status(500).json({ success: false, message: 'Error updating department' });
+        }
+        return res.json({ success: true, rowsAffected: result.affectedRows });
+    });
+});
+
+// Delete department
+router.delete('/admin/departments/:id', (req, res) => {
+    const id = Number(req.params.id || 0);
+    if (!id) return res.status(400).json({ success: false, message: 'Invalid department id' });
+    db.query('DELETE FROM department WHERE ID = ?', [id], (err, result) => {
+        if (err) {
+            console.error('Error deleting department:', err);
+            return res.status(500).json({ success: false, message: 'Error deleting department' });
+        }
+        return res.json({ success: true, rowsAffected: result.affectedRows });
+    });
+});
+
+// --- Update and Delete endpoints for admin CRUD (universities, faculties, departments)
+// Update university
+router.put('/admin/universities/:id', (req, res) => {
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ success:false, message:'Invalid id' });
+    const name = (req.body.name ?? req.body.Name ?? '').trim();
+    const location = req.body.location ?? req.body.Location ?? null;
+    const website = req.body.website ?? req.body.Website ?? null;
+    const emailVal = req.body.email ?? req.body.Email ?? null;
+    const contactVal = req.body.phone ?? req.body.contact ?? req.body.Contact ?? null;
+    if (!name) return res.status(400).json({ success:false, message:'Name is required' });
+    db.query('UPDATE university SET Name = ?, Location = ?, Website = ?, Email = ?, Contact = ? WHERE ID = ?', [name, location, website, emailVal, contactVal, id], (err, result) => {
+        if (err) {
+            console.error('Error updating university:', err);
+            return res.status(500).json({ success:false, message:'Error updating university' });
+        }
+        return res.json({ success:true, id });
+    });
+});
+
+// Delete university
+router.delete('/admin/universities/:id', (req, res) => {
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ success:false, message:'Invalid id' });
+    db.query('DELETE FROM university WHERE ID = ?', [id], (err, result) => {
+        if (err) {
+            console.error('Error deleting university:', err);
+            return res.status(500).json({ success:false, message:'Error deleting university' });
+        }
+        return res.json({ success:true, id });
+    });
+});
+
+// Update faculty
+router.put('/admin/faculties/:id', (req, res) => {
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ success:false, message:'Invalid id' });
+    const name = (req.body.name ?? req.body.Name ?? '').trim();
+    const emailVal = req.body.email ?? req.body.Email ?? null;
+    const phoneVal = req.body.phone ?? req.body.Phone ?? null;
+    if (!name) return res.status(400).json({ success:false, message:'Name is required' });
+    db.query('UPDATE faculty SET Name = ?, Email = ?, Phone = ? WHERE ID = ?', [name, emailVal, phoneVal, id], (err, result) => {
+        if (err) {
+            console.error('Error updating faculty:', err);
+            return res.status(500).json({ success:false, message:'Error updating faculty' });
+        }
+        return res.json({ success:true, id });
+    });
+});
+
+// Delete faculty
+router.delete('/admin/faculties/:id', (req, res) => {
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ success:false, message:'Invalid id' });
+    db.query('DELETE FROM faculty WHERE ID = ?', [id], (err, result) => {
+        if (err) {
+            console.error('Error deleting faculty:', err);
+            return res.status(500).json({ success:false, message:'Error deleting faculty' });
+        }
+        return res.json({ success:true, id });
+    });
+});
+
+// Update department
+router.put('/admin/departments/:id', (req, res) => {
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ success:false, message:'Invalid id' });
+    const name = (req.body.name ?? req.body.Name ?? '').trim();
+    const emailVal = req.body.email ?? req.body.Email ?? null;
+    const phoneVal = req.body.phone ?? req.body.Phone ?? null;
+    if (!name) return res.status(400).json({ success:false, message:'Name is required' });
+    db.query('UPDATE department SET Name = ?, Email = ?, Phone = ? WHERE ID = ?', [name, emailVal, phoneVal, id], (err, result) => {
+        if (err) {
+            console.error('Error updating department:', err);
+            return res.status(500).json({ success:false, message:'Error updating department' });
+        }
+        return res.json({ success:true, id });
+    });
+});
+
+// Delete department
+router.delete('/admin/departments/:id', (req, res) => {
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ success:false, message:'Invalid id' });
+    db.query('DELETE FROM department WHERE ID = ?', [id], (err, result) => {
+        if (err) {
+            console.error('Error deleting department:', err);
+            return res.status(500).json({ success:false, message:'Error deleting department' });
+        }
+        return res.json({ success:true, id });
+    });
+});
+
 module.exports = router;
-
-

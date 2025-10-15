@@ -224,7 +224,8 @@ function escapeHtml(s) {
 function appendUniversityRow(uni) {
     if (!tbodyUnis) return;
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(uni.name || '')}</td><td>${escapeHtml(uni.location || '-')}</td><td>${escapeHtml(uni.website || '-')}</td><td class="actions"><button class="icon-btn" data-id="${uni.id || ''}" onclick="onEdit('university', this.dataset.id)">✎</button><button class="icon-btn" data-id="${uni.id || ''}" onclick="onDelete('university', this.dataset.id)">🗑</button></td>`;
+    // include email and contact columns to match server-rendered table
+    tr.innerHTML = `<td>${escapeHtml(uni.name || '')}</td><td>${escapeHtml(uni.location || '-')}</td><td>${escapeHtml(uni.website || '-')}</td><td>${escapeHtml(uni.email || '-')}</td><td>${escapeHtml(uni.phone || '-')}</td><td class="actions"><button class="icon-btn" data-id="${uni.id || ''}" onclick="onEdit('university', this.dataset.id)">✎</button><button class="icon-btn" data-id="${uni.id || ''}" onclick="onDelete('university', this.dataset.id)">🗑</button></td>`;
     tbodyUnis.appendChild(tr);
 }
 
@@ -232,7 +233,8 @@ function appendFacultyRow(fac) {
     if (!tbodyFacs) return;
     const tr = document.createElement('tr');
     const uniName = (_UNIS.find(u => u.id === String(fac.universityId)) || {}).name || '';
-    tr.innerHTML = `<td>${escapeHtml(fac.name || '')}</td><td>${escapeHtml(uniName || '-')}</td><td class="actions"><button class="icon-btn" data-id="${fac.id || ''}" onclick="onEdit('faculty', this.dataset.id)">✎</button><button class="icon-btn" data-id="${fac.id || ''}" onclick="onDelete('faculty', this.dataset.id)">🗑</button></td>`;
+    // render email and phone columns
+    tr.innerHTML = `<td>${escapeHtml(fac.name || '')}</td><td>${escapeHtml(uniName || '-')}</td><td>${escapeHtml(fac.email || '-')}</td><td>${escapeHtml(fac.phone || '-')}</td><td class="actions"><button class="icon-btn" data-id="${fac.id || ''}" onclick="onEdit('faculty', this.dataset.id)">✎</button><button class="icon-btn" data-id="${fac.id || ''}" onclick="onDelete('faculty', this.dataset.id)">🗑</button></td>`;
     tbodyFacs.appendChild(tr);
 }
 
@@ -241,7 +243,8 @@ function appendDepartmentRow(dep) {
     const tr = document.createElement('tr');
     const fac = (_FACS.find(f => f.id === String(dep.facultyId)) || {});
     const uniName = (_UNIS.find(u => u.id === String(dep.universityId)) || {}).name || '';
-    tr.innerHTML = `<td>${escapeHtml(dep.name || '')}</td><td>${escapeHtml(fac.name || '-')}</td><td>${escapeHtml(uniName || '-')}</td><td class="actions"><button class="icon-btn" data-id="${dep.id || ''}" onclick="onEdit('department', this.dataset.id)">✎</button><button class="icon-btn" data-id="${dep.id || ''}" onclick="onDelete('department', this.dataset.id)">🗑</button></td>`;
+    // include email and phone columns for departments
+    tr.innerHTML = `<td>${escapeHtml(dep.name || '')}</td><td>${escapeHtml(fac.name || '-')}</td><td>${escapeHtml(uniName || '-')}</td><td>${escapeHtml(dep.email || '-')}</td><td>${escapeHtml(dep.phone || '-')}</td><td class="actions"><button class="icon-btn" data-id="${dep.id || ''}" onclick="onEdit('department', this.dataset.id)">✎</button><button class="icon-btn" data-id="${dep.id || ''}" onclick="onDelete('department', this.dataset.id)">🗑</button></td>`;
     tbodyDeps.appendChild(tr);
 }
 
@@ -338,43 +341,73 @@ addModalForm.addEventListener('submit', async (e) => {
     const type = addModal.dataset.type || 'item';
     try {
         if (type === 'university') {
-            const payload = { name: uniNameInput.value.trim(), location: uniLocationInput.value.trim(), website: uniWebsiteInput.value.trim() };
+            const editMode = addModal.dataset.editMode === 'true';
+            const editId = addModal.dataset.editId || null;
+            const payload = { name: uniNameInput.value.trim(), location: uniLocationInput.value.trim(), website: uniWebsiteInput.value.trim(), email: uniEmailInput.value.trim() || null, phone: uniContactInput.value.trim() || null };
             if (!payload.name) return alert('กรุณากรอกชื่อมหาวิทยาลัย');
-            const res = await fetch('/admin/universities', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.message || 'Server error');
-            const newUni = { id: String(data.id), name: payload.name, location: payload.location, website: payload.website };
-            _UNIS.push(newUni);
-            window.__UNIVERSITIES = _UNIS;
-            populateUniversitySelect(facUniversitySelect);
-            populateUniversitySelect(deptUniversitySelect);
-            appendUniversityRow(newUni);
-            alert('เพิ่มมหาวิทยาลัยสำเร็จ');
+            if (editMode && editId) {
+                const res = await fetch('/admin/universities/' + editId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.message || 'Server error');
+                alert('แก้ไขมหาวิทยาลัยเรียบร้อยแล้ว');
+                return location.reload();
+            } else {
+                const res = await fetch('/admin/universities', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.message || 'Server error');
+                const newUni = { id: String(data.id), name: payload.name, location: payload.location, website: payload.website, email: payload.email, phone: payload.phone };
+                _UNIS.push(newUni);
+                window.__UNIVERSITIES = _UNIS;
+                populateUniversitySelect(facUniversitySelect);
+                populateUniversitySelect(deptUniversitySelect);
+                appendUniversityRow(newUni);
+                alert('เพิ่มมหาวิทยาลัยสำเร็จ');
+            }
 
         } else if (type === 'faculty') {
+            const editMode = addModal.dataset.editMode === 'true';
+            const editId = addModal.dataset.editId || null;
             const uniId = facUniversitySelect.value;
             const uniName = facUniversitySelect.selectedOptions[0]?.textContent?.trim() || '';
-            const payload = { university: uniName, name: facNameInput.value.trim() };
+            const payload = { university: uniName, name: facNameInput.value.trim(), email: facEmailInput.value.trim() || null, phone: facPhoneInput.value.trim() || null };
             if (!payload.university || !payload.name) return alert('กรุณาเลือกมหาวิทยาลัยและกรอกชื่อคณะ');
-            const res = await fetch('/admin/faculties', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.message || 'Server error');
-            const newFac = { id: String(data.id), name: payload.name, universityId: uniId };
-            _FACS.push(newFac);
-            window.__FACULTIES = _FACS;
-            populateFacultySelectForUniversity(deptFacultySelect, deptUniversitySelect.value);
-            appendFacultyRow(newFac);
-            alert('เพิ่มคณะสำเร็จ');
+            if (editMode && editId) {
+                const res = await fetch('/admin/faculties/' + editId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.message || 'Server error');
+                alert('แก้ไขคณะเรียบร้อยแล้ว');
+                return location.reload();
+            } else {
+                const res = await fetch('/admin/faculties', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.message || 'Server error');
+                const newFac = { id: String(data.id), name: payload.name, universityId: uniId, email: payload.email, phone: payload.phone };
+                _FACS.push(newFac);
+                window.__FACULTIES = _FACS;
+                populateFacultySelectForUniversity(deptFacultySelect, deptUniversitySelect.value);
+                appendFacultyRow(newFac);
+                alert('เพิ่มคณะสำเร็จ');
+            }
 
         } else if (type === 'department') {
-            const payload = { university: deptUniversitySelect.selectedOptions[0]?.textContent?.trim() || '', faculty: deptFacultySelect.selectedOptions[0]?.textContent?.trim() || '', name: deptNameInput.value.trim() };
+            const editMode = addModal.dataset.editMode === 'true';
+            const editId = addModal.dataset.editId || null;
+            const payload = { university: deptUniversitySelect.selectedOptions[0]?.textContent?.trim() || '', faculty: deptFacultySelect.selectedOptions[0]?.textContent?.trim() || '', name: deptNameInput.value.trim(), email: deptEmailInput.value.trim() || null, phone: deptPhoneInput.value.trim() || null };
             if (!payload.university || !payload.faculty || !payload.name) return alert('กรุณากรอกข้อมูลให้ครบ');
-            const res = await fetch('/admin/departments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.message || 'Server error');
-            const deptObj = { id: String(data.id), name: payload.name, facultyId: (_FACS.find(f => f.name === payload.faculty) || {}).id, universityId: (_UNIS.find(u => u.name === payload.university) || {}).id };
-            appendDepartmentRow(deptObj);
-            alert('เพิ่มสาขาสำเร็จ');
+            if (editMode && editId) {
+                const res = await fetch('/admin/departments/' + editId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.message || 'Server error');
+                alert('แก้ไขสาขาเรียบร้อยแล้ว');
+                return location.reload();
+            } else {
+                const res = await fetch('/admin/departments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.message || 'Server error');
+                const deptObj = { id: String(data.id), name: payload.name, facultyId: (_FACS.find(f => f.name === payload.faculty) || {}).id, universityId: (_UNIS.find(u => u.name === payload.university) || {}).id, email: payload.email, phone: payload.phone };
+                appendDepartmentRow(deptObj);
+                alert('เพิ่มสาขาสำเร็จ');
+            }
 
         } else if (type === 'event') {
             // สร้าง payload และตรวจสอบช่วงเวลา
@@ -484,9 +517,81 @@ document.querySelectorAll('.tabs .tab').forEach(tab => {
     });
 });
 
-// ฟังก์ชันตัวอย่างสำหรับแก้ไข/ลบ (ยังเป็น placeholder)
-function onEdit(type, id) { const parsedId = id ? id : null; const name = prompt('แก้ไข ' + type + ' (id=' + parsedId + ')'); if (name) alert('บันทึกการเปลี่ยนแปลงสำหรับ ' + type + ' id=' + parsedId + ' (ต้องเรียก API เพิ่มเติม)'); }
-function onDelete(type, id) { const parsedId = id ? id : null; if (confirm('ลบ ' + type + ' id=' + parsedId + ' ?')) { alert('ลบแล้ว (ยังต้องเรียก API เพื่อลบจริง)'); } }
+// Implement edit and delete flows using the server endpoints we added
+async function onEdit(type, id) {
+    const parsedId = id ? String(id) : null;
+    if (!parsedId) return alert('Invalid id');
+
+    // set modal into edit mode and remember id
+    addModal.dataset.type = type;
+    addModal.dataset.editMode = 'true';
+    addModal.dataset.editId = parsedId;
+    addModalTitle.textContent = (type === 'university') ? 'แก้ไขมหาวิทยาลัย' : (type === 'faculty') ? 'แก้ไขคณะ' : (type === 'department') ? 'แก้ไขสาขา' : 'แก้ไขรายการ';
+
+    // hide all subforms then show the one we need
+    [formUniversity, formFaculty, formDepartment, document.getElementById('form-event'), document.getElementById('form-announcement')].forEach(el => { if (el) el.classList.add('hidden'); });
+
+    if (type === 'university') {
+        const current = _UNIS.find(u => String(u.id) === String(parsedId)) || {};
+        formUniversity.classList.remove('hidden');
+        uniNameInput.value = current.name || '';
+        uniLocationInput.value = current.location || '';
+        uniWebsiteInput.value = current.website || '';
+        uniEmailInput.value = current.email || '';
+        uniContactInput.value = current.phone || '';
+    }
+
+    if (type === 'faculty') {
+        const current = _FACS.find(f => String(f.id) === String(parsedId)) || {};
+        formFaculty.classList.remove('hidden');
+        // ensure universities select is ready
+        populateUniversitySelect(facUniversitySelect);
+        facUniversitySelect.value = current.universityId || '';
+        facNameInput.value = current.name || '';
+        facEmailInput.value = current.email || '';
+        facPhoneInput.value = current.phone || '';
+    }
+
+    if (type === 'department') {
+        const current = _DEPS.find(d => String(d.id) === String(parsedId)) || {};
+        formDepartment.classList.remove('hidden');
+        populateUniversitySelect(deptUniversitySelect);
+        deptUniversitySelect.value = current.universityId || '';
+        // populate faculties for this university then select
+        await populateFacultySelectForUniversity(deptFacultySelect, deptUniversitySelect.value || '');
+        deptFacultySelect.value = current.facultyId || '';
+        deptNameInput.value = current.name || '';
+        deptEmailInput.value = current.email || '';
+        deptPhoneInput.value = current.phone || '';
+    }
+
+    // show modal
+    document.documentElement.classList.add('modal-open');
+    addModal.classList.remove('hidden');
+    addModal.setAttribute('aria-hidden', 'false');
+    setTimeout(() => { const first = addModal.querySelector('input, select'); if (first) first.focus(); }, 160);
+}
+
+async function onDelete(type, id) {
+    const parsedId = id ? String(id) : null;
+    if (!parsedId) return alert('Invalid id');
+    if (!confirm('ยืนยันการลบ ' + type + ' id=' + parsedId + ' ?')) return;
+
+    try {
+        let url = null;
+        if (type === 'university') url = '/admin/universities/' + parsedId;
+        if (type === 'faculty') url = '/admin/faculties/' + parsedId;
+        if (type === 'department') url = '/admin/departments/' + parsedId;
+        if (!url) return alert('Unknown type');
+        const res = await fetch(url, { method: 'DELETE' });
+        if (!res.ok) throw new Error((await res.json().catch(()=>({message:res.statusText}))).message || 'Delete failed');
+        alert('ลบเรียบร้อยแล้ว');
+        return location.reload();
+    } catch (err) {
+        console.error(err);
+        alert(err.message || 'เกิดข้อผิดพลาดในการลบ');
+    }
+}
 
 // เปิดเผย helper แบบสาธารณะไว้ให้โค้ดอื่นเรียกใช้งานได้
 window.onAdd = onAdd;
