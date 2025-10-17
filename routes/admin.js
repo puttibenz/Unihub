@@ -8,7 +8,7 @@ router.use(express.json());
 router.get('/admin', (req, res) => {
     // fetch universities
     // `university` table stores contact number in column `Contact` (not Phone)
-    const sqlUnis = 'SELECT ID, Name, Location, Website, Email, Contact FROM university ORDER BY Name';
+    const sqlUnis = 'SELECT ID, Name, Location, Website, Email, Contact_Number FROM university ORDER BY Name';
     db.query(sqlUnis, (err, unis) => {
         if (err) {
             console.error('DB select universities error:', err);
@@ -173,7 +173,7 @@ router.post('/admin/universities', (req, res) => {
 
     if (!name) return res.status(400).json({ success: false, message: 'University name is required' });
 
-    db.query('INSERT INTO university (Name, Location, Website, Email, Contact) VALUES (?, ?, ?, ?, ?)', [name, location, website, emailVal, contactVal], (err, result) => {
+    db.query('INSERT INTO university (Name, Location, Website, Email, Contact_Number) VALUES (?, ?, ?, ?, ?)', [name, location, website, emailVal, contactVal], (err, result) => {
         if (err) {
             console.error('Error inserting university:', err);
             return res.status(500).json({ success: false, message: 'Error inserting university' });

@@ -5,7 +5,7 @@ const db = require('../db');
 // GET /universities - render universities listing page with DB data
 router.get('/universities', (req, res) => {
     // include Email and Contact columns (Contact stores phone/contact number)
-    const sql = 'SELECT ID, Name, Location, Website, Email, Contact FROM university ORDER BY Name';
+    const sql = 'SELECT ID, Name, Location, Website, Email, Contact_Number FROM university ORDER BY Name';
     db.query(sql, (err, rows) => {
         if (err) {
             console.error('DB select universities error:', err);

@@ -91,7 +91,7 @@
             <div class="card-container">
                 <% (events || []).forEach(function(ev){ %>
                     <% const tagClass = (ev.tag || '').toLowerCase().includes('openhouse') ? 'openhouse' : (ev.tag || '').toLowerCase().includes('academic') ? 'academic' : (ev.tag || '').toLowerCase().includes('social') ? 'social' : 'university'; %>
-                    <div class="card" data-university="<%= ev.university %>" data-tag="<%= ev.tag %>" data-faculty="<%= ev.faculty || '' %>" data-department="<%= ev.department || '' %>">
+                    <div class="card" data-event-id="<%= ev.id %>" data-university="<%= ev.university %>" data-tag="<%= ev.tag %>" data-faculty="<%= ev.faculty || '' %>" data-department="<%= ev.department || '' %>">
                     <div class="card-header">
                         <div class="tags">
                             <span class="tag <%= tagClass %>"><%= ev.tag %></span>
@@ -113,7 +113,7 @@
                         <p class="description"><%= ev.description %></p>
                     </div>
                     <div class="card-footer">
-                        <button class="btn">เข้าร่วมกิจกรรม</button>
+                        <button class="btn join-btn">เข้าร่วมกิจกรรม</button>
                         <i class="far fa-heart heart-icon"></i>
                     </div>
                 </div>

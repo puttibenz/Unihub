@@ -59,4 +59,118 @@ router.get('/event', (req, res) => {
     });
 });
 
+// shared unregister logic used by both PATCH (preferred) and POST (fallback for non-JS forms)
+function performUnregister(userId, eventId, req, res) {
+    // Soft-delete pattern: update Status -> 'cancelled' and set cancelled_at
+    const updateSql = `UPDATE register SET Status = 'cancelled', cancelled_at = NOW() WHERE User_ID = ? AND Event_ID = ? AND (Status = 'joined' OR Status IS NULL)`;
+    db.query(updateSql, [userId, eventId], (err, result) => {
+        if (err) {
+            console.error('Error updating register status:', err);
+            if (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
+                return res.status(500).json({ success: false, message: 'Database error' });
+            }
+            return res.redirect('/profile');
+        }
+        // if no rows were affected (older rows or different status), try deleting as fallback
+        if (!result || result.affectedRows === 0) {
+            const delSql = `DELETE FROM register WHERE User_ID = ? AND Event_ID = ?`;
+            db.query(delSql, [userId, eventId], (err2, res2) => {
+                if (err2) {
+                    console.error('Error deleting register fallback:', err2);
+                    if (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
+                        return res.status(500).json({ success: false, message: 'Database error' });
+                    }
+                    return res.redirect('/profile');
+                }
+                if (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
+                    return res.json({ success: true, action: 'deleted' });
+                }
+                return res.redirect('/profile');
+            });
+        } else {
+            if (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
+                return res.json({ success: true, action: 'updated' });
+            }
+            return res.redirect('/profile');
+        }
+    });
+}
+
+// PATCH /event/unregister/:id - preferred endpoint for AJAX and RESTful update (soft-delete)
+router.patch('/event/unregister/:id', (req, res) => {
+    if (!req.session || !req.session.user) {
+        if (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
+            return res.status(401).json({ success: false, message: 'Not authenticated' });
+        }
+        return res.redirect('/auth/login');
+    }
+    const userId = req.session.user.id;
+    const eventId = req.params && req.params.id;
+    if (!eventId) {
+        if (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
+            return res.status(400).json({ success: false, message: 'eventId is required' });
+        }
+        return res.redirect('/profile');
+    }
+    performUnregister(userId, eventId, req, res);
+});
+
+// POST /event/register - register current user to an event
+router.post('/event/register', (req, res) => {
+    if (!req.session || !req.session.user) {
+        // if AJAX expect JSON, else redirect to login
+        if (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
+            return res.status(401).json({ success: false, message: 'Not authenticated' });
+        }
+        return res.redirect('/auth/login');
+    }
+
+    const userId = req.session.user.id;
+    const eventId = req.body && (req.body.eventId || req.body.event_id || req.body.ID || req.body.id);
+    if (!eventId) {
+        return res.status(400).json({ success: false, message: 'eventId is required' });
+    }
+
+    // ensure event exists and has a University_ID (every event must have a university)
+    db.query('SELECT ID, University_ID FROM events WHERE ID = ? LIMIT 1', [eventId], (errE, evRows) => {
+        if (errE) {
+            console.error('DB error checking event:', errE);
+            return res.status(500).json({ success: false, message: 'Database error' });
+        }
+        if (!evRows || evRows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Event not found' });
+        }
+        const ev = evRows[0];
+        if (!ev.University_ID) {
+            return res.status(400).json({ success: false, message: 'Event must be associated with a university' });
+        }
+
+        // prevent duplicate registration
+        db.query('SELECT * FROM register WHERE User_ID = ? AND Event_ID = ? LIMIT 1', [userId, eventId], (errS, sRows) => {
+            if (errS) {
+                console.error('DB error checking existing registration:', errS);
+                return res.status(500).json({ success: false, message: 'Database error' });
+            }
+            if (sRows && sRows.length > 0) {
+                // already registered
+                return res.status(409).json({ success: false, message: 'Already registered' });
+            }
+
+            // insert registration, default status = 'joined' (or adjust as needed)
+            db.query('INSERT INTO register (User_ID, Event_ID, Status) VALUES (?, ?, ?)', [userId, eventId, 'joined'], (errI, result) => {
+                if (errI) {
+                    console.error('DB error inserting registration:', errI);
+                    return res.status(500).json({ success: false, message: 'Database error' });
+                }
+
+                // Respond: if request came from a form redirect back to event or profile; if AJAX return JSON
+                if (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
+                    return res.status(201).json({ success: true, id: result.insertId });
+                }
+                return res.redirect('/profile');
+            });
+        });
+    });
+});
+
 module.exports = router;

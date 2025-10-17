@@ -44,45 +44,33 @@
                 <section class="registered-events-section">
                     <h2 class="section-title">กิจกรรมที่ลงทะเบียนแล้ว</h2>
                     <div class="card-container">
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="tags">
-                                    <span class="tag academic">Academic</span>
-                                    <span class="tag university">Harvard University</span>
+                        <% if ((registeredEvents || []).length === 0) { %>
+                            <p class="muted">ยังไม่มีการลงทะเบียนกิจกรรม</p>
+                        <% } else { %>
+                            <% registeredEvents.forEach(function(ev) { %>
+                                <div class="card">
+                                    <div class="card-header">
+                                        <div class="tags">
+                                            <span class="tag university"><%= ev.university || 'มหาวิทยาลัย' %></span>
+                                        </div>
+                                        <h3><%= ev.title %></h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><i class="fas fa-calendar-alt"></i> <%= ev.date || '-' %></p>
+                                        <p><i class="fas fa-clock"></i> <%= ev.time || '-' %></p>
+                                        <p><i class="fas fa-map-marker-alt"></i> <%= ev.location || '-' %></p>
+                                        <p class="description"><%= ev.description ? (ev.description.length > 140 ? ev.description.slice(0,137) + '...' : ev.description) : '' %></p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <form method="post" action="/event/unregister" style="display:inline">
+                                            <input type="hidden" name="eventId" value="<%= ev.id %>">
+                                            <button type="submit" class="btn join-btn">ยกเลิกกิจกรรม</button>
+                                        </form>
+                                        <a href="/event/<%= ev.id %>" class="btn btn-primary">ดูรายละเอียด</a>
+                                    </div>
                                 </div>
-                                <h3>Pre-Med Student Workshop</h3>
-                            </div>
-                            <div class="card-body">
-                                <p><i class="fas fa-calendar-alt"></i> March 18, 2024</p>
-                                <p><i class="fas fa-clock"></i> 10:00 AM - 12:00 PM</p>
-                                <p><i class="fas fa-map-marker-alt"></i> Medical School, Cambridge</p>
-                                <p class="interested"><i class="fas fa-users"></i> 89 students interested</p>
-                                <p class="description">Interactive workshop covering MCAT preparation, medical school applications, and career guidance for aspiring medical...</p>
-                            </div>
-                            <div class="card-footer">
-                                <button class="btn join-btn">ยกเลิกกิจกรรม</button>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="tags">
-                                    <span class="tag openhouse">OpenHouse</span>
-                                    <span class="tag university">MIT</span>
-                                </div>
-                                <h3>Computer Science Open House</h3>
-                            </div>
-                            <div class="card-body">
-                                <p><i class="fas fa-calendar-alt"></i> March 15, 2024</p>
-                                <p><i class="fas fa-clock"></i> 2:00 PM - 5:00 PM</p>
-                                <p><i class="fas fa-map-marker-alt"></i> Campus Center, Boston</p>
-                                <p class="interested"><i class="fas fa-users"></i> 127 students interested</p>
-                                <p class="description">Explore our cutting-edge computer science programs and meet faculty members. Learn about research opportunities a...</p>
-                            </div>
-                            <div class="card-footer">
-                                <button class="btn join-btn">ยกเลิกกิจกรรม</button>
-                            </div>
-                        </div>
+                            <% }); %>
+                        <% } %>
                     </div>
                 </section>
             </div>
@@ -97,5 +85,6 @@
             const user = JSON.parse('<%- JSON.stringify(user || {}) %>');
             console.log("user =", user);
         </script>
+        <script src="/js/profile.js"></script>
     </body>
 </html>

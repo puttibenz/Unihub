@@ -65,7 +65,11 @@
             const timeText = timeP ? timeP.textContent.replace(/\s+/g,' ').trim() : '';
             const locText = locP ? locP.textContent.replace(/\s+/g,' ').trim() : '';
 
+            // read event id from data attribute
+            const eventId = card ? (card.getAttribute('data-event-id') || card.dataset.eventId || null) : null;
+
             currentEvent = {
+                id: eventId,
                 title: title,
                 date: dateText,
                 time: timeText,
@@ -102,7 +106,8 @@
             if(successModal){ successModal.classList.add('hidden'); successModal.setAttribute('aria-hidden','true'); document.documentElement.classList.remove('modal-open'); } 
         }
 
-        document.querySelectorAll('.card .card-footer .btn').forEach(btn => {
+        // bind only join buttons (have class .join-btn)
+        document.querySelectorAll('.join-btn').forEach(btn => {
             btn.addEventListener('click', function(e){
                 const card = e.target.closest('.card');
                 openModalForCard(card);
@@ -111,21 +116,48 @@
 
         if(joinCancel) joinCancel.addEventListener('click', closeJoinModal);
 
-        if(joinConfirm) joinConfirm.addEventListener('click', function(){
+        if(joinConfirm) joinConfirm.addEventListener('click', async function(){
             // close confirmation modal
             closeJoinModal();
 
-            // populate and open success modal
-            if(currentEvent){
-                // build a small payload for QR (encode title + date + location)
-                const payload = JSON.stringify({ title: currentEvent.title, date: currentEvent.date, time: currentEvent.time, location: currentEvent.location });
-                const qrUrl = 'https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=' + encodeURIComponent(payload) + '&chld=L|1';
-                if(successQR) successQR.src = qrUrl;
-                if(successName) successName.textContent = currentEvent.title || '-';
-                if(successLocation) successLocation.textContent = currentEvent.location || '-';
-                if(successTime) successTime.textContent = currentEvent.time || '-';
+            if(!currentEvent || !currentEvent.id){
+                alert('ไม่พบข้อมูลกิจกรรม');
+                return;
             }
-            openSuccessModal();
+
+            try{
+                const resp = await fetch('/event/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ eventId: currentEvent.id })
+                });
+
+                const json = await resp.json().catch(() => null);
+
+                if(resp.status === 201 || resp.ok){
+                    // success: show success modal with QR
+                    const payloadObj = { title: currentEvent.title, date: currentEvent.date, time: currentEvent.time, location: currentEvent.location, registerId: (json && json.id) ? json.id : undefined };
+                    const payload = JSON.stringify(payloadObj);
+                    const qrUrl = 'https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=' + encodeURIComponent(payload) + '&chld=L|1';
+                    if(successQR) successQR.src = qrUrl;
+                    if(successName) successName.textContent = currentEvent.title || '-';
+                    if(successLocation) successLocation.textContent = currentEvent.location || '-';
+                    if(successTime) successTime.textContent = currentEvent.time || '-';
+                    openSuccessModal();
+                } else if(resp.status === 409) {
+                    alert((json && json.message) ? json.message : 'คุณได้ลงทะเบียนแล้ว');
+                } else if(resp.status === 401) {
+                    // not authenticated
+                    window.location.href = '/auth/login';
+                } else {
+                    alert((json && json.message) ? json.message : 'เกิดข้อผิดพลาดขณะลงทะเบียน');
+                }
+            } catch(err){
+                console.error('Error registering:', err);
+                alert('เกิดข้อผิดพลาดขณะลงทะเบียน');
+            } finally {
+                currentEvent = null;
+            }
         });
 
     if(successBack) successBack.addEventListener('click', function(){ closeSuccessModal(); });
