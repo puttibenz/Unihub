@@ -75,18 +75,22 @@ router.patch('/profile', (req, res) => {
     const userId = req.session.user.id;
     // accept JSON body
     const { first_name, last_name, email, phone, school_name } = req.body || {};
-    // basic validation
-    if (!first_name && !last_name && !email && !phone && !school_name) {
+
+    // helper: treat undefined OR empty/whitespace-only strings as "not provided"
+    const isProvided = v => (v !== undefined) && (typeof v !== 'string' || v.trim() !== '');
+
+    // basic validation: at least one provided non-empty field
+    if (!isProvided(first_name) && !isProvided(last_name) && !isProvided(email) && !isProvided(phone) && !isProvided(school_name)) {
         return res.status(400).json({ success: false, message: 'No data to update' });
     }
 
     const fields = [];
     const params = [];
-    if (first_name !== undefined) { fields.push('first_name = ?'); params.push(first_name); }
-    if (last_name !== undefined) { fields.push('last_name = ?'); params.push(last_name); }
-    if (email !== undefined) { fields.push('email = ?'); params.push(email); }
-    if (phone !== undefined) { fields.push('phone_number = ?'); params.push(phone); }
-    if (school_name !== undefined) { fields.push('school_name = ?'); params.push(school_name); }
+    if (isProvided(first_name)) { fields.push('first_name = ?'); params.push(first_name.trim ? first_name.trim() : first_name); }
+    if (isProvided(last_name)) { fields.push('last_name = ?'); params.push(last_name.trim ? last_name.trim() : last_name); }
+    if (isProvided(email)) { fields.push('email = ?'); params.push(email.trim ? email.trim() : email); }
+    if (isProvided(phone)) { fields.push('phone_number = ?'); params.push(phone.trim ? phone.trim() : phone); }
+    if (isProvided(school_name)) { fields.push('school_name = ?'); params.push(school_name.trim ? school_name.trim() : school_name); }
 
     if (fields.length === 0) {
         return res.status(400).json({ success: false, message: 'No valid fields' });
@@ -99,13 +103,13 @@ router.patch('/profile', (req, res) => {
             console.error('Error updating user profile:', err);
             return res.status(500).json({ success: false, message: 'Database error' });
         }
-        // update session copy
-        if (!req.session.user) req.session.user = {};
-        if (first_name !== undefined) req.session.user.first_name = first_name;
-        if (last_name !== undefined) req.session.user.last_name = last_name;
-        if (email !== undefined) req.session.user.email = email;
-        if (phone !== undefined) req.session.user.phone = phone;
-        if (school_name !== undefined) req.session.user.school_name = school_name;
+    // update session copy only for fields we actually updated
+    if (!req.session.user) req.session.user = {};
+    if (isProvided(first_name)) req.session.user.first_name = first_name.trim ? first_name.trim() : first_name;
+    if (isProvided(last_name)) req.session.user.last_name = last_name.trim ? last_name.trim() : last_name;
+    if (isProvided(email)) req.session.user.email = email.trim ? email.trim() : email;
+    if (isProvided(phone)) req.session.user.phone = phone.trim ? phone.trim() : phone;
+    if (isProvided(school_name)) req.session.user.school_name = school_name.trim ? school_name.trim() : school_name;
 
         return res.json({ success: true });
     });

@@ -16,7 +16,7 @@ router.get('/admin', (req, res) => {
         }
 
         // fetch faculties
-    const sqlFacs = `SELECT f.ID, f.Name, f.University_ID, f.Email as Email, f.Phone as Phone, u.Name as UniversityName 
+    const sqlFacs = `SELECT f.ID, f.Name, f.University_ID, f.Email as Email, f.Phone_number as Phone, u.Name as UniversityName 
             FROM faculty f 
             JOIN university u ON f.University_ID = u.ID 
             ORDER BY f.Name`;
@@ -27,7 +27,7 @@ router.get('/admin', (req, res) => {
             }
 
             // fetch departments joined with faculty/university names (useful for rendering table)
-            const sqlDeps = `SELECT d.ID as ID, d.Name as Name, d.Faculty_ID as Faculty_ID, d.Email as Email, d.Phone as Phone, f.Name as FacultyName, f.University_ID as University_ID, u.Name as UniversityName
+            const sqlDeps = `SELECT d.ID as ID, d.Name as Name, d.Faculty_ID as Faculty_ID, d.Email as Email, d.Phone_number as Phone, f.Name as FacultyName, f.University_ID as University_ID, u.Name as UniversityName
                              FROM department d
                              JOIN faculty f ON d.Faculty_ID = f.ID
                              JOIN university u ON f.University_ID = u.ID
