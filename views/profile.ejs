@@ -16,33 +16,29 @@
 
         <main class="profile-page-content">
             <div class="container">
-                <section class="profile-info-section card">
-                    <div class="profile-header">
-                        <h2 class="profile-name"><%= [(user && user.first_name) || '', (user && user.last_name) || ''].join(' ').trim() || 'ไม่พบชื่อผู้ใช้' %></h2>
-                        <p class="profile-role">นักเรียน</p>
-                    </div>
-                    <div class="profile-details">
-                        <div class="detail-item">
-                            <i class="fas fa-envelope"></i>
-                            <p><%= (user && user.email) || '-' %></p>
+                <!-- Blue header similar to design -->
+                <section class="profile-header-large">
+                    <div class="profile-header-inner container-grid">
+                        <div class="avatar-column">
+                            <div class="avatar-wrapper">
+                                <img src="/images/user.png" alt="avatar" class="profile-picture-large">
+                                <div class="avatar-role">Student</div>
+                            </div>
+                            <div class="profile-actions">
+                                <button class="btn edit-btn"><i class="fas fa-cog"></i> แก้ไขข้อมูล</button>
+                            </div>
                         </div>
-                        <div class="detail-item">
-                            <i class="fas fa-university"></i>
-                            <p><%= (user && user.school_name) || '-' %></p>
+                        <div class="info-column">
+                            <div class="line name-line"><%= [(user && user.first_name) || '', (user && user.last_name) || ''].join(' ').trim() || 'ไม่พบชื่อผู้ใช้' %></div>
+                            <div class="line school-line"><%= (user && user.school_name) || 'โรงเรียน' %></div>
+                            <div class="line email-line"><%= (user && user.email) || '-' %></div>
+                            <div class="line phone-line"><%= (user && user.phone) || '-' %></div>
                         </div>
-                        <div class="detail-item">
-                            <i class="fas fa-calendar-alt"></i>
-                            <p>เข้าร่วมตั้งแต่: มกราคม 2023</p>
-                        </div>
-                    </div>
-                    <div class="profile-actions">
-                        <button class="btn edit-btn">แก้ไขข้อมูล</button>
-                        <button class="btn password-btn">เปลี่ยนรหัสผ่าน</button>
                     </div>
                 </section>
 
                 <section class="registered-events-section">
-                    <h2 class="section-title">กิจกรรมที่ลงทะเบียนแล้ว</h2>
+                    <h2 class="section-title">กิจกรรมที่เข้าร่วมแล้ว</h2>
                     <div class="card-container">
                         <% if ((registeredEvents || []).length === 0) { %>
                             <p class="muted">ยังไม่มีการลงทะเบียนกิจกรรม</p>
@@ -85,6 +81,40 @@
             const user = JSON.parse('<%- JSON.stringify(user || {}) %>');
             console.log("user =", user);
         </script>
+        <!-- Edit profile modal -->
+        <div id="editProfileModal" class="modal" style="display:none">
+            <div class="modal-overlay"></div>
+            <div class="modal-dialog">
+                <h3>แก้ไขข้อมูลส่วนตัว</h3>
+                <form id="editProfileForm">
+                    <div class="form-row">
+                        <label>ชื่อ</label>
+                        <input type="text" name="first_name" id="first_name">
+                    </div>
+                    <div class="form-row">
+                        <label>นามสกุล</label>
+                        <input type="text" name="last_name" id="last_name">
+                    </div>
+                    <div class="form-row">
+                        <label>อีเมล</label>
+                        <input type="email" name="email" id="email">
+                    </div>
+                    <div class="form-row">
+                        <label>โทรศัพท์</label>
+                        <input type="text" name="phone" id="phone">
+                    </div>
+                    <div class="form-row">
+                        <label>โรงเรียน</label>
+                        <input type="text" name="school_name" id="school_name">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="cancelEdit" class="btn">ยกเลิก</button>
+                        <button type="submit" class="btn btn-primary">บันทึก</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <script src="/js/profile.js"></script>
     </body>
 </html>

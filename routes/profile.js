@@ -67,4 +67,48 @@ router.get('/profile', (req, res) => {
     });
 });
 
+// PATCH /profile - update current user's profile (expects JSON)
+router.patch('/profile', (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+    const userId = req.session.user.id;
+    // accept JSON body
+    const { first_name, last_name, email, phone, school_name } = req.body || {};
+    // basic validation
+    if (!first_name && !last_name && !email && !phone && !school_name) {
+        return res.status(400).json({ success: false, message: 'No data to update' });
+    }
+
+    const fields = [];
+    const params = [];
+    if (first_name !== undefined) { fields.push('first_name = ?'); params.push(first_name); }
+    if (last_name !== undefined) { fields.push('last_name = ?'); params.push(last_name); }
+    if (email !== undefined) { fields.push('email = ?'); params.push(email); }
+    if (phone !== undefined) { fields.push('phone_number = ?'); params.push(phone); }
+    if (school_name !== undefined) { fields.push('school_name = ?'); params.push(school_name); }
+
+    if (fields.length === 0) {
+        return res.status(400).json({ success: false, message: 'No valid fields' });
+    }
+    const sql = `UPDATE users SET ${fields.join(', ')} WHERE ID = ?`;
+    params.push(userId);
+
+    db.query(sql, params, (err, result) => {
+        if (err) {
+            console.error('Error updating user profile:', err);
+            return res.status(500).json({ success: false, message: 'Database error' });
+        }
+        // update session copy
+        if (!req.session.user) req.session.user = {};
+        if (first_name !== undefined) req.session.user.first_name = first_name;
+        if (last_name !== undefined) req.session.user.last_name = last_name;
+        if (email !== undefined) req.session.user.email = email;
+        if (phone !== undefined) req.session.user.phone = phone;
+        if (school_name !== undefined) req.session.user.school_name = school_name;
+
+        return res.json({ success: true });
+    });
+});
+
 module.exports = router;
