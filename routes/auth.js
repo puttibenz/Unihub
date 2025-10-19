@@ -5,11 +5,15 @@ const db = require('../db');
 const router = express.Router();
 
 // Register
-router.get('/register', (req,res) => {
-    res.render('register', {title:'Register'});
+router.get('/register', async (req, res, next) => {
+    try {
+        res.render('register', { title: 'Register' });
+    } catch (err) {
+        next(err);
+    }
 });
 
-router.post('/register', async (req, res) => {
+router.post('/register', async (req, res, next) => {
     // Expect payload: { name, lastname, email, phone?, user_type, password, school_name|null }
     const { name, lastname, email, phone, user_type, password, school_name } = req.body || {};
 
@@ -62,40 +66,44 @@ router.post('/register', async (req, res) => {
         const schoolValue = needsSchool ? school_name : '';
         const phoneSanitized = phone && phone.trim() !== '' ? phone.trim() : '';
 
-        db.query(sql, [name, lastname, emailLower, schoolValue, user_type, phoneSanitized, hash], (err, result) => {
-            if (err) {
-                if (err.code === 'ER_DUP_ENTRY') {
-                    return res.status(409).json({ message: 'อีเมลนี้ถูกใช้แล้ว' });
-                }
-                if (err.code === 'ER_BAD_NULL_ERROR') {
-                    console.error('NOT NULL constraint hit:', err.sqlMessage);
-                    return res.status(500).json({ message: 'คอลัมน์บางตัวห้าม NULL (ปรับ schema หรือใช้ค่า default)', column: err.sqlMessage });
-                }
-                console.error('Register insert error:', err);
-                return res.status(500).json({ message: 'เกิดข้อผิดพลาด', error: err.code });
-            }
+        try {
+            const [result] = await db.query(sql, [name, lastname, emailLower, schoolValue, user_type, phoneSanitized, hash]);
             return res.status(201).json({ message: 'สมัครสมาชิกสำเร็จ' });
-        });
+        } catch (err) {
+            if (err && err.code === 'ER_DUP_ENTRY') {
+                return res.status(409).json({ message: 'อีเมลนี้ถูกใช้แล้ว' });
+            }
+            if (err && err.code === 'ER_BAD_NULL_ERROR') {
+                console.error('NOT NULL constraint hit:', err.sqlMessage || err.message);
+                return res.status(500).json({ message: 'คอลัมน์บางตัวห้าม NULL (ปรับ schema หรือใช้ค่า default)', column: err.sqlMessage || err.message });
+            }
+            console.error('Register insert error:', err);
+            return res.status(500).json({ message: 'เกิดข้อผิดพลาด', error: err.code || err.message });
+        }
     } catch (error) {
-        return res.status(500).json({ message: 'เกิดข้อผิดพลาด', error });
+        next(error);
     }
 });
 
 // Login
-router.get('/login', (req,res) => {
-    res.render('login', {title:'Login'});
+router.get('/login', async (req, res, next) => {
+    try {
+        res.render('login', { title: 'Login' });
+    } catch (err) {
+        next(err);
+    }
 });
 
-router.post('/login', (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-        return res.status(400).json({ message: 'กรอกข้อมูลให้ครบถ้วน' });
-    }
-    const sql = `SELECT ID, first_name, last_name, email, school_name, user_type, phone_number, password 
-                 FROM users WHERE email = ?`;
-    db.query(sql, [email.toLowerCase()], async (err, results) => {
-        if (err) return res.status(500).json({ message: 'เกิดข้อผิดพลาด', error: err });
-        if (results.length === 0) {
+router.post('/login', async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ message: 'กรอกข้อมูลให้ครบถ้วน' });
+        }
+        const sql = `SELECT ID, first_name, last_name, email, school_name, user_type, phone_number, password 
+                     FROM users WHERE email = ?`;
+        const [results] = await db.query(sql, [email.toLowerCase()]);
+        if (!results || results.length === 0) {
             return res.status(401).json({ message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
         }
         const user = results[0];
@@ -113,14 +121,25 @@ router.post('/login', (req, res) => {
             user_type: user.user_type || user.User_Type || null
         };
         return res.status(200).json({ message: 'เข้าสู่ระบบสำเร็จ' });
-    });
+    } catch (err) {
+        next(err);
+    }
 });
 
 // Logout
-router.get('/logout', (req, res) => {
-    req.session.destroy(() => {
+router.get('/logout', async (req, res, next) => {
+    try {
+        // wrap session.destroy in a Promise so we can await it
+        await new Promise((resolve, reject) => {
+            req.session.destroy(err => {
+                if (err) return reject(err);
+                resolve();
+            });
+        });
         res.redirect('/');
-    });
+    } catch (err) {
+        next(err);
+    }
 });
 
 module.exports = router;

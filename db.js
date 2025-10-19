@@ -1,18 +1,21 @@
-const mysql = require('mysql');
+const mysql = require('mysql2/promise'); // <--- เปลี่ยนตรงนี้
 
-const db = mysql.createConnection({
+const pool = mysql.createPool({
     host: 'localhost',
-    user: 'root', // เปลี่ยนตาม user ของคุณ
-    password: '', // ใส่รหัสผ่านถ้ามี
+    user: 'root',
+    password: '',
     database: 'unihub'
 });
 
-db.connect((err) => {
-    if (err) {
-        console.error('MySQL connection error:', err);
-    } else {
-        console.log('Connected to MySQL database.');
-    }
-});
+module.exports = pool;
 
-module.exports = db;
+pool.getConnection()
+    .then((connection) => {
+        console.log('Connected to MySQL database.');
+        connection.release();
+    })
+    .catch((err) => {
+        console.error('MySQL connection error:', err);
+    });
+
+module.exports = pool;

@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router()
 
-// Define your routes here
-router.get('/', (req,res) => {
-    res.render('index', {title:'Index'});
+router.get('/', async (req,res, next) => {
+    try {
+        return res.render('index', {title:'Index'});
+    } catch (err) { return next(err); }
 });
-
 
 module.exports = router

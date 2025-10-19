@@ -3,14 +3,10 @@ const router = express.Router();
 const db = require('../db');
 
 // GET /universities - render universities listing page with DB data
-router.get('/universities', (req, res) => {
-    // include Email and Contact columns (Contact stores phone/contact number)
-    const sql = 'SELECT ID, Name, Location, Website, Email, Contact_Number FROM university ORDER BY Name';
-    db.query(sql, (err, rows) => {
-        if (err) {
-            console.error('DB select universities error:', err);
-            return res.status(500).send('Database error');
-        }
+router.get('/universities', async (req, res, next) => {
+    try {
+        const sql = 'SELECT ID, Name, Location, Website, Email, Contact_Number FROM university ORDER BY Name';
+        const [rows] = await db.query(sql);
 
         const universities = (rows || []).map(r => ({
             id: r.ID ?? r.id,
@@ -22,7 +18,10 @@ router.get('/universities', (req, res) => {
         }));
 
         return res.render('universities', { title: 'Universities', universities });
-    });
+    } catch (err) {
+        console.error('DB select universities error:', err);
+        return next(err);
+    }
 });
 
 module.exports = router;

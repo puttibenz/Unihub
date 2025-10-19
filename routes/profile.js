@@ -2,15 +2,14 @@ const express = require('express');
 const db = require('../db');
 const router = express.Router();
 
-router.get('/profile', (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('/auth/login');
-    }
+router.get('/profile', async (req, res, next) => {
+    try {
+        if (!req.session.user) {
+            return res.redirect('/auth/login');
+        }
 
-    const userId = req.session.user.id;
-
-    // Fetch events the user has registered for from register table joined to events
-    const sql = `SELECT r.User_ID as user_id, r.Event_ID as event_id, r.Status as status,
+        const userId = req.session.user.id;
+        const sql = `SELECT r.User_ID as user_id, r.Event_ID as event_id, r.Status as status,
                         e.ID as id, e.Title as title, e.description as description, e.location as location, e.start_time as start_time, e.end_time as end_time,
                         u.Name as university
                  FROM register r
@@ -19,12 +18,7 @@ router.get('/profile', (req, res) => {
                  WHERE r.User_ID = ? AND (r.Status = 'joined' OR r.Status IS NULL)
                  ORDER BY e.start_time DESC`;
 
-    db.query(sql, [userId], (err, rows) => {
-        if (err) {
-            console.error('Error querying registered events for /profile page:', err);
-            // render profile with empty registeredEvents on error
-            return res.render('profile', { title: 'Profile', user: req.session.user, registeredEvents: [] });
-        }
+        const [rows] = await db.query(sql, [userId]);
 
         const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
         const registeredEvents = (rows || []).map(r => {
@@ -51,7 +45,6 @@ router.get('/profile', (req, res) => {
             } catch (ex) { }
 
             return {
-                // event id may be in e.ID (r.id) or fallback to the register table Event_ID
                 id: r.id || r.event_id || r.Event_ID || null,
                 title: r.title || '',
                 university: r.university || '',
@@ -64,55 +57,49 @@ router.get('/profile', (req, res) => {
         });
 
         return res.render('profile', { title: 'Profile', user: req.session.user, registeredEvents });
-    });
+    } catch (err) {
+        console.error('Error querying registered events for /profile page:', err);
+        return next(err);
+    }
 });
 
 // PATCH /profile - update current user's profile (expects JSON)
-router.patch('/profile', (req, res) => {
-    if (!req.session || !req.session.user) {
-        return res.status(401).json({ success: false, message: 'Not authenticated' });
-    }
-    const userId = req.session.user.id;
-    // accept JSON body
-    const { first_name, last_name, email, phone, school_name } = req.body || {};
-
-    // helper: treat undefined OR empty/whitespace-only strings as "not provided"
-    const isProvided = v => (v !== undefined) && (typeof v !== 'string' || v.trim() !== '');
-
-    // basic validation: at least one provided non-empty field
-    if (!isProvided(first_name) && !isProvided(last_name) && !isProvided(email) && !isProvided(phone) && !isProvided(school_name)) {
-        return res.status(400).json({ success: false, message: 'No data to update' });
-    }
-
-    const fields = [];
-    const params = [];
-    if (isProvided(first_name)) { fields.push('first_name = ?'); params.push(first_name.trim ? first_name.trim() : first_name); }
-    if (isProvided(last_name)) { fields.push('last_name = ?'); params.push(last_name.trim ? last_name.trim() : last_name); }
-    if (isProvided(email)) { fields.push('email = ?'); params.push(email.trim ? email.trim() : email); }
-    if (isProvided(phone)) { fields.push('phone_number = ?'); params.push(phone.trim ? phone.trim() : phone); }
-    if (isProvided(school_name)) { fields.push('school_name = ?'); params.push(school_name.trim ? school_name.trim() : school_name); }
-
-    if (fields.length === 0) {
-        return res.status(400).json({ success: false, message: 'No valid fields' });
-    }
-    const sql = `UPDATE users SET ${fields.join(', ')} WHERE ID = ?`;
-    params.push(userId);
-
-    db.query(sql, params, (err, result) => {
-        if (err) {
-            console.error('Error updating user profile:', err);
-            return res.status(500).json({ success: false, message: 'Database error' });
+router.patch('/profile', async (req, res, next) => {
+    try {
+        if (!req.session || !req.session.user) {
+            return res.status(401).json({ success: false, message: 'Not authenticated' });
         }
-    // update session copy only for fields we actually updated
-    if (!req.session.user) req.session.user = {};
-    if (isProvided(first_name)) req.session.user.first_name = first_name.trim ? first_name.trim() : first_name;
-    if (isProvided(last_name)) req.session.user.last_name = last_name.trim ? last_name.trim() : last_name;
-    if (isProvided(email)) req.session.user.email = email.trim ? email.trim() : email;
-    if (isProvided(phone)) req.session.user.phone = phone.trim ? phone.trim() : phone;
-    if (isProvided(school_name)) req.session.user.school_name = school_name.trim ? school_name.trim() : school_name;
+        const userId = req.session.user.id;
+        const { first_name, last_name, email, phone, school_name } = req.body || {};
+        const isProvided = v => (v !== undefined) && (typeof v !== 'string' || v.trim() !== '');
+        if (!isProvided(first_name) && !isProvided(last_name) && !isProvided(email) && !isProvided(phone) && !isProvided(school_name)) {
+            return res.status(400).json({ success: false, message: 'No data to update' });
+        }
+
+        const fields = [];
+        const params = [];
+        if (isProvided(first_name)) { fields.push('first_name = ?'); params.push(first_name.trim ? first_name.trim() : first_name); }
+        if (isProvided(last_name)) { fields.push('last_name = ?'); params.push(last_name.trim ? last_name.trim() : last_name); }
+        if (isProvided(email)) { fields.push('email = ?'); params.push(email.trim ? email.trim() : email); }
+        if (isProvided(phone)) { fields.push('phone_number = ?'); params.push(phone.trim ? phone.trim() : phone); }
+        if (isProvided(school_name)) { fields.push('school_name = ?'); params.push(school_name.trim ? school_name.trim() : school_name); }
+        if (fields.length === 0) return res.status(400).json({ success: false, message: 'No valid fields' });
+        const sql = `UPDATE users SET ${fields.join(', ')} WHERE ID = ?`;
+        params.push(userId);
+
+        await db.query(sql, params);
+        if (!req.session.user) req.session.user = {};
+        if (isProvided(first_name)) req.session.user.first_name = first_name.trim ? first_name.trim() : first_name;
+        if (isProvided(last_name)) req.session.user.last_name = last_name.trim ? last_name.trim() : last_name;
+        if (isProvided(email)) req.session.user.email = email.trim ? email.trim() : email;
+        if (isProvided(phone)) req.session.user.phone = phone.trim ? phone.trim() : phone;
+        if (isProvided(school_name)) req.session.user.school_name = school_name.trim ? school_name.trim() : school_name;
 
         return res.json({ success: true });
-    });
+    } catch (err) {
+        console.error('Error updating user profile:', err);
+        return next(err);
+    }
 });
 
 module.exports = router;
