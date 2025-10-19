@@ -137,9 +137,27 @@
                 if(resp.status === 201 || resp.ok){
                     // success: show success modal with QR
                     const payloadObj = { title: currentEvent.title, date: currentEvent.date, time: currentEvent.time, location: currentEvent.location, registerId: (json && json.id) ? json.id : undefined };
-                    const payload = JSON.stringify(payloadObj);
-                    const qrUrl = 'https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=' + encodeURIComponent(payload) + '&chld=L|1';
-                    if(successQR) successQR.src = qrUrl;
+                    // Try local images first: /images/qr-<registerId>.png, then /images/qrcode.png. If none exist, fallback to Google Charts QR.
+                    async function findLocalQR(registerId){
+                        const candidates = [];
+                        if(registerId) candidates.push('/images/qr-' + encodeURIComponent(registerId) + '.png');
+                        candidates.push('/images/qrcode.png');
+                        for(const p of candidates){
+                            try{
+                                const r = await fetch(p, { method: 'HEAD' });
+                                if(r && r.ok) return p;
+                            }catch(e){ /* ignore */ }
+                        }
+                        return null;
+                    }
+
+                    // prefer local qr image; fall back to the default image placed in /public/images/qrcode.png
+                    const localPath = await findLocalQR(payloadObj.registerId);
+                    if(localPath && successQR){
+                        successQR.src = localPath;
+                    } else {
+                        if(successQR) successQR.src = '/images/qrcode.png';
+                    }
                     if(successName) successName.textContent = currentEvent.title || '-';
                     if(successLocation) successLocation.textContent = currentEvent.location || '-';
                     if(successTime) successTime.textContent = currentEvent.time || '-';

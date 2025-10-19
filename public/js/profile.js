@@ -1,6 +1,10 @@
 (function(){
-  function qs(s, root){ return (root||document).querySelector(s); }
-  function qsa(s, root){ return Array.from((root||document).querySelectorAll(s)); }
+  function qs(s, root) { 
+    return (root||document).querySelector(s); 
+  }
+  function qsa(s, root) { 
+    return Array.from((root||document).querySelectorAll(s)); 
+  }
 
   // intercept unregister forms/buttons and call PATCH /event/unregister/:id
   qsa('form[action="/event/unregister"]').forEach(form => {
