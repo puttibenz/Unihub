@@ -7,8 +7,6 @@ const pool = mysql.createPool({
     database: 'unihub'
 });
 
-module.exports = pool;
-
 pool.getConnection()
     .then((connection) => {
         console.log('Connected to MySQL database.');
