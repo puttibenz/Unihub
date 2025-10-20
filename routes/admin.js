@@ -11,7 +11,13 @@ async function query(sql, params = []) {
     return rows;
 }
 
-// GET /admin - render admin CRUD page with collections
+// GET /admin
+// Render admin CRUD page and provide collections for the admin UI.
+// Response (renders 'crud' template):
+//   - universities: [{ id, name, location, website, email, phone }, ...]
+//   - faculties: [{ id, name, universityId, university, email, phone }, ...]
+//   - departments: [{ id, name, facultyId, faculty, universityId, university, email, phone }, ...]
+// Errors are forwarded to next(err).
 router.get('/admin', async (req, res, next) => {
     try {
         const unis = await query('SELECT ID, Name, Location, Website, Email, Contact_Number FROM university ORDER BY Name');
@@ -36,7 +42,11 @@ router.get('/admin', async (req, res, next) => {
     }
 });
 
-// Create faculty
+// POST /admin/faculties
+// Create a new faculty associated with an existing university (lookup by university name).
+// Body: { university: '<University Name>', name: '<Faculty Name>', email?: '<email>', phone?: '<phone>' }
+// Response: 201 { success: true, id }
+// Validation errors return 400; other errors forwarded to next(err).
 router.post('/admin/faculties', async (req, res, next) => {
     try {
         const uniRaw = req.body.university ?? req.body.University;
@@ -51,7 +61,11 @@ router.post('/admin/faculties', async (req, res, next) => {
     } catch (err) { return next(err); }
 });
 
-// Create department
+// POST /admin/departments
+// Create a new department under an existing faculty and university (lookup by names).
+// Body: { university: '<University Name>', faculty: '<Faculty Name>', name: '<Department Name>', email?: '<email>', phone?: '<phone>' }
+// Response: 201 { success: true, id }
+// Validation errors return 400; other errors forwarded to next(err).
 router.post('/admin/departments', async (req, res, next) => {
     try {
         const uniRaw = req.body.university ?? req.body.University;
@@ -71,7 +85,11 @@ router.post('/admin/departments', async (req, res, next) => {
     } catch (err) { return next(err); }
 });
 
-// Create event
+// POST /admin/events
+// Create an event. If category is a name and doesn't exist, it will be created.
+// Body: { title, start_time, end_time, university: '<name>', faculty?: '<name>', department?: '<name>', category?: '<name or id>', description?, location? }
+// Response: 201 { success: true, id }
+// Validation errors return 400; other errors forwarded to next(err).
 router.post('/admin/events', async (req, res, next) => {
     try {
         const uniRaw = req.body.university ?? req.body.University;
@@ -129,7 +147,11 @@ router.post('/admin/events', async (req, res, next) => {
     } catch (err) { return next(err); }
 });
 
-// Create announcement
+// POST /admin/announcements
+// Create an announcement linked to university/faculty/department (lookup by names).
+// Body: { title, description, university: '<name>', faculty?: '<name>', department?: '<name>' }
+// Response: 201 { success: true, id }
+// Validation errors return 400; other errors forwarded to next(err).
 router.post('/admin/announcements', async (req, res, next) => {
     try {
         const uniRaw = req.body.university ?? req.body.University;
@@ -163,7 +185,11 @@ router.post('/admin/announcements', async (req, res, next) => {
     } catch (err) { return next(err); }
 });
 
-// Update/Delete endpoints (universities/faculties/departments)
+// PUT /admin/universities/:id
+// Update a university record by id.
+// Body accepts: { name, location?, website?, email?, phone? } (also accepts Name/Location/Website/Email/Contact aliases)
+// Response: { success: true, rowsAffected: 1 }
+// Validation errors return 400; other errors forwarded to next(err).
 router.put('/admin/universities/:id', async (req, res, next) => {
     try {
         const id = Number(req.params.id || 0);
@@ -178,6 +204,10 @@ router.put('/admin/universities/:id', async (req, res, next) => {
     } catch (err) { return next(err); }
 });
 
+// DELETE /admin/universities/:id
+// Delete a university by id.
+// Response: { success: true, rowsAffected: 1 }
+// Validation errors return 400; other errors forwarded to next(err).
 router.delete('/admin/universities/:id', async (req, res, next) => {
     try {
         const id = Number(req.params.id || 0);
@@ -187,6 +217,10 @@ router.delete('/admin/universities/:id', async (req, res, next) => {
     } catch (err) { return next(err); }
 });
 
+// PUT /admin/faculties/:id
+// Update a faculty record by id. Body: { name, email?, phone? }
+// Response: { success: true, rowsAffected: 1 }
+// Validation errors return 400; other errors forwarded to next(err).
 router.put('/admin/faculties/:id', async (req, res, next) => {
     try {
         const id = Number(req.params.id || 0);
@@ -199,6 +233,10 @@ router.put('/admin/faculties/:id', async (req, res, next) => {
     } catch (err) { return next(err); }
 });
 
+// DELETE /admin/faculties/:id
+// Delete a faculty by id.
+// Response: { success: true, rowsAffected: 1 }
+// Validation errors return 400; other errors forwarded to next(err).
 router.delete('/admin/faculties/:id', async (req, res, next) => {
     try {
         const id = Number(req.params.id || 0);
@@ -208,6 +246,10 @@ router.delete('/admin/faculties/:id', async (req, res, next) => {
     } catch (err) { return next(err); }
 });
 
+// PUT /admin/departments/:id
+// Update a department record by id. Body: { name, email?, phone? }
+// Response: { success: true, rowsAffected: 1 }
+// Validation errors return 400; other errors forwarded to next(err).
 router.put('/admin/departments/:id', async (req, res, next) => {
     try {
         const id = Number(req.params.id || 0);
@@ -220,6 +262,10 @@ router.put('/admin/departments/:id', async (req, res, next) => {
     } catch (err) { return next(err); }
 });
 
+// DELETE /admin/departments/:id
+// Delete a department by id.
+// Response: { success: true, rowsAffected: 1 }
+// Validation errors return 400; other errors forwarded to next(err).
 router.delete('/admin/departments/:id', async (req, res, next) => {
     try {
         const id = Number(req.params.id || 0);
@@ -227,99 +273,6 @@ router.delete('/admin/departments/:id', async (req, res, next) => {
         await db.query('DELETE FROM department WHERE ID = ?', [id]);
         return res.json({ success: true, rowsAffected: 1 });
     } catch (err) { return next(err); }
-});
-
-module.exports = router;
-// Update university
-router.put('/admin/universities/:id', (req, res) => {
-    const id = Number(req.params.id);
-    if (!id) return res.status(400).json({ success:false, message:'Invalid id' });
-    const name = (req.body.name ?? req.body.Name ?? '').trim();
-    const location = req.body.location ?? req.body.Location ?? null;
-    const website = req.body.website ?? req.body.Website ?? null;
-    const emailVal = req.body.email ?? req.body.Email ?? null;
-    const contactVal = req.body.phone ?? req.body.contact ?? req.body.Contact ?? null;
-    if (!name) return res.status(400).json({ success:false, message:'Name is required' });
-    db.query('UPDATE university SET Name = ?, Location = ?, Website = ?, Email = ?, Contact = ? WHERE ID = ?', [name, location, website, emailVal, contactVal, id], (err, result) => {
-        if (err) {
-            console.error('Error updating university:', err);
-            return res.status(500).json({ success:false, message:'Error updating university' });
-        }
-        return res.json({ success:true, id });
-    });
-});
-
-// Delete university
-router.delete('/admin/universities/:id', (req, res) => {
-    const id = Number(req.params.id);
-    if (!id) return res.status(400).json({ success:false, message:'Invalid id' });
-    db.query('DELETE FROM university WHERE ID = ?', [id], (err, result) => {
-        if (err) {
-            console.error('Error deleting university:', err);
-            return res.status(500).json({ success:false, message:'Error deleting university' });
-        }
-        return res.json({ success:true, id });
-    });
-});
-
-// Update faculty
-router.put('/admin/faculties/:id', (req, res) => {
-    const id = Number(req.params.id);
-    if (!id) return res.status(400).json({ success:false, message:'Invalid id' });
-    const name = (req.body.name ?? req.body.Name ?? '').trim();
-    const emailVal = req.body.email ?? req.body.Email ?? null;
-    const phoneVal = req.body.phone ?? req.body.Phone ?? null;
-    if (!name) return res.status(400).json({ success:false, message:'Name is required' });
-    db.query('UPDATE faculty SET Name = ?, Email = ?, Phone = ? WHERE ID = ?', [name, emailVal, phoneVal, id], (err, result) => {
-        if (err) {
-            console.error('Error updating faculty:', err);
-            return res.status(500).json({ success:false, message:'Error updating faculty' });
-        }
-        return res.json({ success:true, id });
-    });
-});
-
-// Delete faculty
-router.delete('/admin/faculties/:id', (req, res) => {
-    const id = Number(req.params.id);
-    if (!id) return res.status(400).json({ success:false, message:'Invalid id' });
-    db.query('DELETE FROM faculty WHERE ID = ?', [id], (err, result) => {
-        if (err) {
-            console.error('Error deleting faculty:', err);
-            return res.status(500).json({ success:false, message:'Error deleting faculty' });
-        }
-        return res.json({ success:true, id });
-    });
-});
-
-// Update department
-router.put('/admin/departments/:id', (req, res) => {
-    const id = Number(req.params.id);
-    if (!id) return res.status(400).json({ success:false, message:'Invalid id' });
-    const name = (req.body.name ?? req.body.Name ?? '').trim();
-    const emailVal = req.body.email ?? req.body.Email ?? null;
-    const phoneVal = req.body.phone ?? req.body.Phone ?? null;
-    if (!name) return res.status(400).json({ success:false, message:'Name is required' });
-    db.query('UPDATE department SET Name = ?, Email = ?, Phone = ? WHERE ID = ?', [name, emailVal, phoneVal, id], (err, result) => {
-        if (err) {
-            console.error('Error updating department:', err);
-            return res.status(500).json({ success:false, message:'Error updating department' });
-        }
-        return res.json({ success:true, id });
-    });
-});
-
-// Delete department
-router.delete('/admin/departments/:id', (req, res) => {
-    const id = Number(req.params.id);
-    if (!id) return res.status(400).json({ success:false, message:'Invalid id' });
-    db.query('DELETE FROM department WHERE ID = ?', [id], (err, result) => {
-        if (err) {
-            console.error('Error deleting department:', err);
-            return res.status(500).json({ success:false, message:'Error deleting department' });
-        }
-        return res.json({ success:true, id });
-    });
 });
 
 module.exports = router;
