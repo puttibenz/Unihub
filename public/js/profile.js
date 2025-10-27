@@ -105,4 +105,54 @@
     });
   }
 
+  // --- Detail modal handling for registered events ---
+  const detailModal = qs('#detailModal');
+  const detailQr = qs('#detail-qr');
+  const successName = qs('#success-event-name');
+  const successLocation = qs('#success-location');
+  const successTime = qs('#success-time');
+  const closeDetailBtn = qs('#closeDetail');
+
+  async function trySetQr(eventId){
+    if(!eventId) return;
+    const localPath = `/images/qrcodes/${encodeURIComponent(eventId)}.png`;
+    try{
+      // try HEAD first to avoid downloading large payloads
+      const res = await fetch(localPath, { method: 'HEAD' });
+      if(res && res.ok){
+        detailQr.src = localPath;
+        return;
+      }
+    }catch(e){
+      // fallthrough to fallback
+    }
+    // fallback to generic local QR
+    detailQr.src = '/images/qrcode.png';
+  }
+
+  function openDetailModal(){
+    if(detailModal) detailModal.style.display = 'flex';
+  }
+  function closeDetailModal(){ if(detailModal) detailModal.style.display = 'none'; }
+
+  qsa('.detail-btn').forEach(btn => {
+    btn.addEventListener('click', async function(e){
+      const id = btn.getAttribute('data-id');
+      const title = btn.getAttribute('data-title') || '';
+      const location = btn.getAttribute('data-location') || '';
+      const time = btn.getAttribute('data-time') || '';
+      if(successName) successName.textContent = title;
+      if(successLocation) successLocation.textContent = location;
+      if(successTime) successTime.textContent = time;
+      await trySetQr(id);
+      openDetailModal();
+    });
+  });
+
+  if(closeDetailBtn) closeDetailBtn.addEventListener('click', closeDetailModal);
+  const detailOverlay = qs('#detailModal .modal-overlay');
+  if(detailOverlay) detailOverlay.addEventListener('click', closeDetailModal);
+  // close with ESC
+  window.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeDetailModal(); });
+
 })();

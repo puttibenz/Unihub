@@ -286,3 +286,19 @@ body {
 .form-row input { width:100%; padding:10px 12px; border-radius:8px; border:1px solid #ddd; }
 .form-actions { display:flex; gap:12px; justify-content:flex-end; margin-top:8px; }
 .modal .btn { padding:8px 14px; }
+
+/* Detail modal specifics */
+.detail-header h3 { margin:0 0 8px 0; color:#0b72ff; }
+.detail-header {text-align: center;}
+.detail-body { text-align: center; padding: 10px 6px; }
+.detail-body img { width: 160px; height: 160px; object-fit: contain; display: block; margin: 0 auto 12px; border-radius: 12px; background: #fafafa; padding: 8px; }
+.detail-body .success-line { font-size: 0.95rem; color: #333; margin: 8px 0; }
+.detail-body .success-line strong { color:#444; margin-right: 6px; }
+.detail-body #success-event-name { font-weight: 600; }
+.detail-body #success-location, .detail-body #success-time { color:#555; }
+
+@media (max-width: 480px) {
+    .detail-body img { width: 120px; height: 120px; }
+    .modal-dialog { width: 92%; padding: 16px; }
+}
+

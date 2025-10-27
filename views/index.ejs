@@ -19,7 +19,7 @@
                     <h1>ประตูสู่ความสำเร็จในรั้ว<span>มหาวิทยาลัย</span></h1>
                     <p>ค้นพบกิจกรรมที่น่าตื่นเต้น, เชื่อมต่อกับมหาวิทยาลัยชั้นนำ และก้าวไปสู่ก้าวต่อไปในเส้นทางการศึกษาของคุณ</p>
                     <div class="hero-buttons">
-                        <a href="/events" class="hero-btn-primary">สำรวจกิจกรรม</a>
+                        <a href="/event" class="hero-btn-primary">สำรวจกิจกรรม</a>
                         <a href="/universities" class="hero-btn-secondary">ดูมหาวิทยาลัย</a>
                     </div>
                 </div>
@@ -70,70 +70,37 @@
                     <h1>กิจกรรมเด่น</h1>
                     <h3>อย่าพลาดโอกาสดีๆ จากมหาวิทยาลัยชั้นนำเหล่านี้</h3>
                     <div class="card-container">
-                        <div class="card">
+                        <% (events || []).forEach(function(ev){ %>
+                            <% const tagClass = (ev.tag || '').toLowerCase().includes('openhouse') ? 'openhouse' : (ev.tag || '').toLowerCase().includes('academic') ? 'academic' : (ev.tag || '').toLowerCase().includes('social') ? 'social' : 'university'; %>
+                            <div class="card" data-event-id="<%= ev.id %>" data-university="<%= ev.university %>" data-tag="<%= ev.tag %>" data-faculty="<%= ev.faculty || '' %>" data-department="<%= ev.department || '' %>">
                             <div class="card-header">
                                 <div class="tags">
-                                    <span class="tag openhouse">OpenHouse</span>
-                                    <span class="tag university">MIT</span>
+                                    <span class="tag <%= tagClass %>"><%= ev.tag %></span>
+                                    <span class="tag university"><%= ev.university %></span>
                                 </div>
-                                <h3>งาน Open House ภาควิชาวิทยาการคอมพิวเตอร์</h3>
+                                <h3><%= ev.title %></h3>
                             </div>
                             <div class="card-body">
-                                <p><i class="fas fa-calendar-alt"></i> 15 มีนาคม 2024</p>
-                                <p><i class="fas fa-clock"></i> 14:00 น. - 17:00 น.</p>
-                                <p><i class="fas fa-map-marker-alt"></i> Campus Center, Boston</p>
-                                <p class="interested"><i class="fas fa-users"></i> 127 คนสนใจ</p>
-                                <p class="description">สำรวจหลักสูตรวิทยาการคอมพิวเตอร์ที่ทันสมัยและพบปะอาจารย์ผู้สอน</p>
-                            </div>
-                            <div class="card-footer">
-                                <button class="btn">เข้าร่วมกิจกรรม</button>
-                                <i class="far fa-heart heart-icon"></i>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="tags">
-                                    <span class="tag academic">Academic</span>
-                                    <span class="tag university">Harvard University</span>
+                                <p><i class="fas fa-calendar-alt"></i> <%= (new Date(ev.date)).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                                <% if (ev.time) { %>
+                                <p><i class="fas fa-clock"></i> <%= ev.time %></p>
+                                <% } %>
+                                <% if (ev.location) { %>
+                                <p><i class="fas fa-map-marker-alt"></i> <%= ev.location %></p>
+                                <% } %>
+                                <% if (typeof ev.interested !== 'undefined') { %>
+                                <p class="interested"><i class="fas fa-users"></i> <%= ev.interested %> คนสนใจ</p>
+                                <% } %>
+                                <p class="description"><%= ev.description %></p>
                                 </div>
-                                <h3>เวิร์คช็อปสำหรับนักศึกษาเตรียมแพทย์</h3>
-                            </div>
-                            <div class="card-body">
-                                <p><i class="fas fa-calendar-alt"></i> 18 มีนาคม 2024</p>
-                                <p><i class="fas fa-clock"></i> 10:00 น. - 12:00 น.</p>
-                                <p><i class="fas fa-map-marker-alt"></i> Medical School, Cambridge</p>
-                                <p class="interested"><i class="fas fa-users"></i> 89 คนสนใจ</p>
-                                <p class="description">เวิร์กช็อปแบบอินเทอร์แอคทีฟเกี่ยวกับการเตรียมตัวสอบ MCAT, การสมัครแพทย์</p>
-                            </div>
                             <div class="card-footer">
-                                <button class="btn">เข้าร่วมกิจกรรม</button>
+                                <button class="btn join-btn">เข้าร่วมกิจกรรม</button>
                                 <i class="far fa-heart heart-icon"></i>
                             </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="tags">
-                                    <span class="tag social">Social</span>
-                                    <span class="tag university">Stanford University</span>
-                                </div>
-                                <h3>เทศกาลฤดูใบไม้ผลิในมหาวิทยาลัย</h3>
                             </div>
-                            <div class="card-body">
-                                <p><i class="fas fa-calendar-alt"></i> 22 มีนาคม 2024</p>
-                                <p><i class="fas fa-clock"></i> 12:00 น. - 20:00 น.</p>
-                                <p><i class="fas fa-map-marker-alt"></i> Main Quad, Palo Alto</p>
-                                <p class="interested"><i class="fas fa-users"></i> 245 คนสนใจ</p>
-                                <p class="description">เข้าร่วมวันแห่งอาหาร, ดนตรี และความสนุกสนาน และสัมผัสชีวิตในมหาวิทยาลัย</p>
-                            </div>
-                            <div class="card-footer">
-                                <button class="btn">เข้าร่วมกิจกรรม</button>
-                                <i class="far fa-heart heart-icon"></i>
-                            </div>
-                        </div>
+                            <% }) %>
                     </div>
-                    <a href="/events" class="btn-view-events">ดูอีเวนต์ทั้งหมด <i class="fas fa-arrow-right"></i></a>
+                    <a href="/event" class="btn-view-events">ดูอีเวนต์ทั้งหมด <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
         </section>
