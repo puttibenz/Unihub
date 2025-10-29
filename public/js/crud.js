@@ -273,6 +273,9 @@ function appendAnnouncementRow(a) {
 function onAdd(type) {
     // ตั้งค่า type ของ modal และ title ตามประเภท
     addModal.dataset.type = type;
+    // ensure editMode is cleared when adding
+    addModal.dataset.editMode = 'false';
+    addModal.dataset.editId = '';
     addModalTitle.textContent = (type === 'university') ? 'เพิ่มมหาวิทยาลัย' : (type === 'faculty') ? 'เพิ่มคณะ' : (type === 'department') ? 'เพิ่มสาขา' : (type === 'event') ? 'เพิ่มกิจกรรม' : 'เพิ่มรายการ';
 
     // ซ่อนทุกฟอร์มย่อย แล้วเปิดเฉพาะฟอร์มที่ต้องการ
@@ -316,6 +319,8 @@ function closeAddModal() {
     document.documentElement.classList.remove('modal-open');
     addModal.classList.add('hidden');
     addModal.dataset.type = '';
+    addModal.dataset.editMode = 'false';
+    addModal.dataset.editId = '';
     addModal.setAttribute('aria-hidden', 'true');
 }
 addModalCancel.addEventListener('click', () => closeAddModal());
@@ -452,14 +457,27 @@ addModalForm.addEventListener('submit', async (e) => {
                 if (depObj2) payload.major = depObj2.name || payload.major || '';
             }
 
+            const editMode = addModal.dataset.editMode === 'true';
+            const editId = addModal.dataset.editId || null;
             let res;
-            try { res = await fetch('/admin/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); } catch (err) { res = null; console.warn('Network error posting event:', err); }
+            try {
+                if (editMode && editId) {
+                    res = await fetch('/admin/events/' + editId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: payload.title, description: payload.description, location: payload.location, startTime: payload.startTime, endTime: payload.endTime, category: payload.category, university: payload.university, faculty: payload.faculty, department: payload.major }) });
+                } else {
+                    res = await fetch('/admin/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                }
+            } catch (err) { res = null; console.warn('Network error posting/putting event:', err); }
 
             if (res && res.ok) {
                 const data = await res.json().catch(() => ({}));
-                const newEvent = { id: String(data.id || ''), title: payload.title, description: payload.description || '', location: payload.location || '', start_time: payload.startTime || '', end_time: payload.endTime || '', category: payload.category || '', university: payload.university || '', faculty: payload.faculty || '', department: payload.major || '' };
-                appendEventRow(newEvent);
-                alert('เพิ่มกิจกรรมสำเร็จ');
+                if (editMode && editId) {
+                    alert('แก้ไขกิจกรรมเรียบร้อยแล้ว');
+                    return location.reload();
+                } else {
+                    const newEvent = { id: String(data.id || ''), title: payload.title, description: payload.description || '', location: payload.location || '', start_time: payload.startTime || '', end_time: payload.endTime || '', category: payload.category || '', university: payload.university || '', faculty: payload.faculty || '', department: payload.major || '' };
+                    appendEventRow(newEvent);
+                    alert('เพิ่มกิจกรรมสำเร็จ');
+                }
             } else {
                 // ถ้าบันทึกบนเซิร์ฟเวอร์ไม่สำเร็จ ให้ถามผู้ใช้ว่าจะบันทึกเฉพาะบนเครื่องหรือไม่
                 if (res) {
@@ -473,23 +491,35 @@ addModalForm.addEventListener('submit', async (e) => {
                 }
                 const newEvent = { id: String(Date.now()), title: payload.title, description: payload.description || '', location: payload.location || '', start_time: payload.startTime || '', end_time: payload.endTime || '', category: payload.category || '', university: payload.university || '', faculty: payload.faculty || '', department: payload.major || '' };
                 appendEventRow(newEvent);
-                alert('เพิ่มกิจกรรม (client-only)');
+                alert(editMode ? 'แก้ไขกิจกรรม (client-only)' : 'เพิ่มกิจกรรม (client-only)');
             }
 
         } else if (type === 'announcement') {
+            const editMode = addModal.dataset.editMode === 'true';
+            const editId = addModal.dataset.editId || null;
             const payload = { title: annTitleInput.value.trim(), description: annDescriptionInput.value.trim(), university: annUniversitySelect.selectedOptions[0]?.textContent?.trim() || '', faculty: annFacultyInput.value.trim() || undefined, department: annDepartmentInput.value.trim() || undefined };
             if (!payload.title) return alert('กรุณากรอกหัวข้อประกาศ');
             let resAnn;
-            try { resAnn = await fetch('/admin/announcements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); } catch (x) { resAnn = null; }
+            try {
+                if (editMode && editId) {
+                    resAnn = await fetch('/admin/announcements/' + editId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                } else {
+                    resAnn = await fetch('/admin/announcements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                }
+            } catch (x) { resAnn = null; }
             if (resAnn && resAnn.ok) {
                 const data = await resAnn.json().catch(() => ({}));
+                if (editMode && editId) {
+                    alert('แก้ไขประกาศเรียบร้อยแล้ว');
+                    return location.reload();
+                }
                 const newAnn = { id: String(data.id || ''), title: payload.title, description: payload.description, university: payload.university, faculty: payload.faculty, department: payload.department };
                 appendAnnouncementRow(newAnn);
-                alert('เพิ่มประกาศสำเร็จ');
+                alert(editMode ? 'แก้ไขประกาศสำเร็จ' : 'เพิ่มประกาศสำเร็จ');
             } else {
                 const newAnn = { id: String(Date.now()), title: payload.title, description: payload.description, university: payload.university, faculty: payload.faculty, department: payload.department };
                 appendAnnouncementRow(newAnn);
-                alert('เพิ่มประกาศ (client-only)');
+                alert(editMode ? 'แก้ไขประกาศ (client-only)' : 'เพิ่มประกาศ (client-only)');
             }
         } else {
             const name = (document.getElementById('add-modal-name') || {}).value || '';
@@ -565,6 +595,63 @@ async function onEdit(type, id) {
         deptPhoneInput.value = current.phone || '';
     }
 
+    if (type === 'event') {
+        // find the table row for this event id and populate event form
+        const btn = document.querySelector('#panel-events button.icon-btn[data-id="' + parsedId + '"]');
+        const tr = btn ? btn.closest('tr') : null;
+        const cells = tr ? Array.from(tr.querySelectorAll('td')) : [];
+        // expected columns: title(0), description(1), location(2), start(3), end(4), category(5), university(6), faculty(7), department(8)
+        if (document.getElementById('form-event')) {
+            document.getElementById('form-event').classList.remove('hidden');
+            populateUniversitySelect(eventUniversitySelect);
+            eventTitleInput.value = (cells[0] && cells[0].textContent) ? cells[0].textContent.trim() : '';
+            eventDescriptionInput.value = (cells[1] && cells[1].textContent) ? cells[1].textContent.trim() : '';
+            eventLocationInput.value = (cells[2] && cells[2].textContent) ? cells[2].textContent.trim() : '';
+            try { if (cells[3] && cells[3].textContent) eventStartInput.value = (new Date(cells[3].textContent.trim())).toISOString().slice(0,16); } catch(e) {}
+            try { if (cells[4] && cells[4].textContent) eventEndInput.value = (new Date(cells[4].textContent.trim())).toISOString().slice(0,16); } catch(e) {}
+            if (cells[5] && cells[5].textContent) eventCategorySelect.value = cells[5].textContent.trim();
+            if (cells[6] && cells[6].textContent) {
+                const uniName = cells[6].textContent.trim();
+                const uniOption = Array.from(eventUniversitySelect.options).find(o => (o.textContent || '').trim() === uniName);
+                if (uniOption) eventUniversitySelect.value = uniOption.value;
+            }
+            // populate faculties after university selected
+            await populateFacultySelectForUniversity(eventFacultySelect, eventUniversitySelect.value || '');
+            if (cells[7] && cells[7].textContent) {
+                const facName = cells[7].textContent.trim();
+                const facOption = Array.from(eventFacultySelect.options).find(o => (o.textContent || '').trim() === facName);
+                if (facOption) eventFacultySelect.value = facOption.value;
+            }
+            // try to set department (major) select
+            if (cells[8] && cells[8].textContent) {
+                const depName = cells[8].textContent.trim();
+                // try to find in department select (if it's a datalist/select)
+                const depOpt = Array.from((eventMajorInput.options || [])).find(o => (o.textContent || '').trim() === depName);
+                if (depOpt) eventMajorInput.value = depOpt.value;
+                else eventMajorInput.value = depName;
+            }
+        }
+    }
+
+    if (type === 'announcement') {
+        const btn = document.querySelector('#panel-announcements button.icon-btn[data-id="' + parsedId + '"]');
+        const tr = btn ? btn.closest('tr') : null;
+        const cells = tr ? Array.from(tr.querySelectorAll('td')) : [];
+        if (document.getElementById('form-announcement')) {
+            document.getElementById('form-announcement').classList.remove('hidden');
+            annTitleInput.value = (cells[0] && cells[0].textContent) ? cells[0].textContent.trim() : '';
+            annDescriptionInput.value = (cells[1] && cells[1].textContent) ? cells[1].textContent.trim() : '';
+            if (cells[2] && cells[2].textContent) {
+                populateUniversitySelect(annUniversitySelect);
+                const uniName = cells[2].textContent.trim();
+                const opt = Array.from(annUniversitySelect.options).find(o => (o.textContent || '').trim() === uniName);
+                if (opt) annUniversitySelect.value = opt.value;
+            }
+            annFacultyInput.value = (cells[3] && cells[3].textContent) ? cells[3].textContent.trim() : '';
+            annDepartmentInput.value = (cells[4] && cells[4].textContent) ? cells[4].textContent.trim() : '';
+        }
+    }
+
     // show modal
     document.documentElement.classList.add('modal-open');
     addModal.classList.remove('hidden');
@@ -579,9 +666,11 @@ async function onDelete(type, id) {
 
     try {
         let url = null;
-        if (type === 'university') url = '/admin/universities/' + parsedId;
-        if (type === 'faculty') url = '/admin/faculties/' + parsedId;
-        if (type === 'department') url = '/admin/departments/' + parsedId;
+    if (type === 'university') url = '/admin/universities/' + parsedId;
+    if (type === 'faculty') url = '/admin/faculties/' + parsedId;
+    if (type === 'department') url = '/admin/departments/' + parsedId;
+    if (type === 'event') url = '/admin/events/' + parsedId;
+    if (type === 'announcement') url = '/admin/announcements/' + parsedId;
         if (!url) return alert('Unknown type');
         const res = await fetch(url, { method: 'DELETE' });
         if (!res.ok) throw new Error((await res.json().catch(()=>({message:res.statusText}))).message || 'Delete failed');
