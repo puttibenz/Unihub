@@ -12,11 +12,11 @@ router.get('/profile', async (req, res, next) => {
         const sql = `SELECT r.User_ID as user_id, r.Event_ID as event_id, r.Status as status,
                         e.ID as id, e.Title as title, e.description as description, e.location as location, e.start_time as start_time, e.end_time as end_time,
                         u.Name as university
-                 FROM register r
-                 LEFT JOIN events e ON r.Event_ID = e.ID
-                 LEFT JOIN university u ON e.university_ID = u.ID
-                 WHERE r.User_ID = ? AND (r.Status = 'joined' OR r.Status IS NULL)
-                 ORDER BY e.start_time DESC`;
+                    FROM register r
+                    LEFT JOIN events e ON r.Event_ID = e.ID
+                    LEFT JOIN university u ON e.university_ID = u.ID
+                    WHERE r.User_ID = ? AND (r.Status = 'joined' OR r.Status IS NULL)
+                    ORDER BY e.start_time DESC`;
 
         const [rows] = await db.query(sql, [userId]);
 
@@ -63,8 +63,8 @@ router.get('/profile', async (req, res, next) => {
     }
 });
 
-// PATCH /profile - update current user's profile (expects JSON)
-router.patch('/profile', async (req, res, next) => {
+// PUT /profile - accept PUT as an alternative to PATCH for full/partial updates
+router.put('/profile', async (req, res, next) => {
     try {
         if (!req.session || !req.session.user) {
             return res.status(401).json({ success: false, message: 'Not authenticated' });
@@ -97,7 +97,7 @@ router.patch('/profile', async (req, res, next) => {
 
         return res.json({ success: true });
     } catch (err) {
-        console.error('Error updating user profile:', err);
+        console.error('Error updating user profile (PUT):', err);
         return next(err);
     }
 });

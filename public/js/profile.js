@@ -68,33 +68,39 @@
   const overlay = qs('#editProfileModal .modal-overlay');
   if(overlay) overlay.addEventListener('click', closeEditModal);
 
-  // submit profile edits via PATCH /profile (expects JSON)
+  // submit profile edits via PUT /profile (send only changed fields)
   if(editForm){
     editForm.addEventListener('submit', async function(e){
       e.preventDefault();
-      const data = {
+      // build payload with only changed values compared to window.user
+      const current = window.user || {};
+      const raw = {
         first_name: qs('#first_name').value.trim(),
         last_name: qs('#last_name').value.trim(),
         email: qs('#email').value.trim(),
         phone: qs('#phone').value.trim(),
         school_name: qs('#school_name').value.trim()
       };
+      const payload = {};
+      Object.keys(raw).forEach(k => {
+        const oldVal = (current[k] || '');
+        const newVal = (raw[k] == null) ? '' : String(raw[k]);
+        if (String(oldVal) !== newVal) payload[k] = newVal;
+      });
+      if (Object.keys(payload).length === 0) { closeEditModal(); return; }
+
       try{
         const res = await fetch('/profile', {
-          method: 'PATCH',
+          method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify(data)
+          body: JSON.stringify(payload)
         });
         const json = await res.json().catch(()=>null);
         if(res.ok){
-          // update page values quickly without reload
-          if(window.user){ Object.assign(window.user, data); }
-          // update the visible lines
-          qs('.name-line').textContent = (data.first_name + ' ' + data.last_name).trim() || 'ไม่พบชื่อผู้ใช้';
-          qs('.school-line').textContent = data.school_name || 'โรงเรียน';
-          qs('.email-line').textContent = data.email || '-';
-          qs('.phone-line').textContent = data.phone || '-';
-          closeEditModal();
+          // apply to local window.user and reload to reflect authoritative session/server rendering
+          Object.assign(window.user, payload);
+          alert('อัปเดตข้อมูลเรียบร้อยแล้ว');
+          return window.location.reload();
         } else {
           alert((json && json.message) ? json.message : 'อัปเดตไม่สำเร็จ');
         }

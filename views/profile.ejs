@@ -78,8 +78,9 @@
             </div>
         </footer>
         <script>
-            const user = JSON.parse('<%- JSON.stringify(user || {}) %>');
-            console.log("user =", user);
+            // expose user to window so client scripts can read/compare easily
+            window.user = JSON.parse('<%- JSON.stringify(user || {}) %>');
+            console.log("user =", window.user);
         </script>
         <!-- Edit profile modal -->
         <div id="editProfileModal" class="modal" style="display:none">
