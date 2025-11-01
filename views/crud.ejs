@@ -126,11 +126,7 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>Title</th>
-                                <th>Description</th>
-                                <th>Location</th>
-                                <th>Start Time</th>
-                                <th>End Time</th>
+                                <th>Title</th>   
                                 <th>Category</th>
                                 <th>University</th>
                                 <th>Faculty</th>
@@ -143,10 +139,6 @@
                             <% evSample.forEach(function(e){ %>
                                 <tr data-category="<%= (e.category || '') %>">
                                     <td><%= e.title || e.Title || 'Untitled' %></td>
-                                    <td><%= e.description || '-' %></td>
-                                    <td><%= e.location || '-' %></td>
-                                    <td><%= e.start_time || e.startTime || '-' %></td>
-                                    <td><%= e.end_time || e.endTime || '-' %></td>
                                     <td><%= e.category || '-' %></td>
                                     <td><%= e.university || '-' %></td>
                                     <td><%= e.faculty || '-' %></td>

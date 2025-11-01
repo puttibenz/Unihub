@@ -19,11 +19,7 @@ const db = require('./db'); // นำเข้าโมดูล db.js
 // Example: ADMIN_EMAILS=admin@uni.edu,owner@uni.edu
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@uni.edu').split(',').map(s => s.trim()).filter(Boolean);
 
-app.use(session({
-    secret: 'your_secret_key', // เปลี่ยนเป็นค่าสุ่มของคุณเอง
-    resave: false,
-    saveUninitialized: false
-}));
+// NOTE: session middleware is configured below with cookie options and rolling=true
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.set('view engine','ejs');
@@ -45,7 +41,7 @@ app.use(session({
 
 // Middleware ส่ง user ไปทุกหน้า และ expose admin info ให้ view 
 app.use((req, res, next) => {
-    res.locals.user = req.session.user; // หรือ req.user ตามที่คุณใช้
+    res.locals.user = req.session.user; //
     // expose configured admin emails and a convenience flag
     res.locals.adminEmails = ADMIN_EMAILS;
     res.locals.isAdmin = !!(req.session.user && req.session.user.email && ADMIN_EMAILS.includes(req.session.user.email));
