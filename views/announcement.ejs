@@ -6,6 +6,7 @@
     <title>ประกาศมหาวิทยาลัย</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/css/style_events.css">
+    <link rel="stylesheet" href="/css/style_announcement.css">
     <link rel="stylesheet" href="/css/user_btn.css">
     <link rel="stylesheet" href="/css/nav.css">
     <link rel="stylesheet" href="/css/footer.css">
@@ -59,7 +60,7 @@
                             <p class="muted">ยังไม่มีประกาศในขณะนี้</p>
                         <% } else { %>
                             <% anns.forEach(function(a){ %>
-                            <article class="card announcement-card" data-id="<%= a.id %>" data-university="<%= a.university %>">
+                            <article class="card announcement-card" data-id="<%= a.id %>" data-university="<%= a.university %>" data-faculty="<%= a.faculty %>" data-department="<%= a.department %>">
                                 <header class="card-header">
                                     <div class="tags">
                                         <span class="tag university"><%= a.university %></span>
@@ -71,9 +72,9 @@
                                 </main>
                                 <footer class="card-footer">
                                     <% if(a.id){ %>
-                                        <a class="btn" href="/announcement/<%= a.id %>" aria-label="ดูรายละเอียดประกาศ <%= a.title %>">ดูเพิ่มเติม</a>
+                                        <a class="btn view-ann-btn" href="/announcement/<%= a.id %>" aria-label="ดูรายละเอียดประกาศ <%= a.title %>">ดูเพิ่มเติม</a>
                                     <% } else { %>
-                                        <button class="btn" aria-label="ดูเพิ่มเติม">ดูเพิ่มเติม</button>
+                                        <button class="btn view-ann-btn" aria-label="ดูเพิ่มเติม">ดูเพิ่มเติม</button>
                                     <% } %>
                                     <div class="heart-icon" role="img" aria-label="ชอบ">❤</div>
                                 </footer>
@@ -84,8 +85,27 @@
                 </div>
             </section>
 
+            <!-- Modal for announcement details -->
+            <div id="annDetailModal" class="modal" style="display:none">
+                <div class="modal-overlay"></div>
+                <div class="modal-dialog">
+                    <button id="annClose" class="modal-close" aria-label="ปิด">×</button>
+                    <h2 id="annTitle">Title</h2>
+                    <div class="ann-tags">
+                        <span id="annUniversity" class="pill">University</span>
+                        <span id="annFaculty" class="pill">Faculty</span>
+                        <span id="annDepartment" class="pill">Department</span>
+                    </div>
+                    <hr />
+                    <div class="ann-description">
+                        <h3>Description</h3>
+                        <p id="annDescription">...</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- <%- include('partials/footer') %> -->
 
-            <script src="public/js/announcement.js"></script>
+            <script src="/js/announcement.js"></script>
         </body>
     </html>

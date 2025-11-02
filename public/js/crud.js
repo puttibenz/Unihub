@@ -345,9 +345,9 @@ addModalForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const type = addModal.dataset.type || 'item';
     try {
-        if (type === 'university') {
+         if (type === 'university') {
             const editMode = addModal.dataset.editMode === 'true';
-            const editId = addModal.dataset.editId || null;
+           const editId = addModal.dataset.editId || null;
             const payload = { name: uniNameInput.value.trim(), location: uniLocationInput.value.trim(), website: uniWebsiteInput.value.trim(), email: uniEmailInput.value.trim() || null, phone: uniContactInput.value.trim() || null };
             if (!payload.name) return alert('กรุณากรอกชื่อมหาวิทยาลัย');
             if (editMode && editId) {
@@ -479,19 +479,15 @@ addModalForm.addEventListener('submit', async (e) => {
                     alert('เพิ่มกิจกรรมสำเร็จ');
                 }
             } else {
-                // ถ้าบันทึกบนเซิร์ฟเวอร์ไม่สำเร็จ ให้ถามผู้ใช้ว่าจะบันทึกเฉพาะบนเครื่องหรือไม่
+                // server returned error or network failure: show informative message and do not perform client-only fallback
                 if (res) {
                     const errBody = await res.json().catch(() => null);
                     const msg = (errBody && errBody.message) ? errBody.message : (res.statusText || ('status ' + res.status));
-                    const doFallback = confirm('ไม่สามารถเพิ่มกิจกรรมบนเซิร์ฟเวอร์: ' + msg + '\n\nต้องการบันทึกเฉพาะบนเครื่อง (client-only) หรือไม่?');
-                    if (!doFallback) return;
+                    alert('ไม่สามารถบันทึกกิจกรรมบนเซิร์ฟเวอร์: ' + msg);
                 } else {
-                    const doFallback = confirm('ไม่สามารถติดต่อเซิร์ฟเวอร์เพื่อเพิ่มกิจกรรม\nต้องการบันทึกเฉพาะบนเครื่อง (client-only) หรือไม่?');
-                    if (!doFallback) return;
+                    alert('ไม่สามารถติดต่อเซิร์ฟเวอร์เพื่อบันทึกกิจกรรม โปรดลองอีกครั้ง');
                 }
-                const newEvent = { id: String(Date.now()), title: payload.title, description: payload.description || '', location: payload.location || '', start_time: payload.startTime || '', end_time: payload.endTime || '', category: payload.category || '', university: payload.university || '', faculty: payload.faculty || '', department: payload.major || '' };
-                appendEventRow(newEvent);
-                alert(editMode ? 'แก้ไขกิจกรรม (client-only)' : 'เพิ่มกิจกรรม (client-only)');
+                return;
             }
 
         } else if (type === 'announcement') {
@@ -517,9 +513,15 @@ addModalForm.addEventListener('submit', async (e) => {
                 appendAnnouncementRow(newAnn);
                 alert(editMode ? 'แก้ไขประกาศสำเร็จ' : 'เพิ่มประกาศสำเร็จ');
             } else {
-                const newAnn = { id: String(Date.now()), title: payload.title, description: payload.description, university: payload.university, faculty: payload.faculty, department: payload.department };
-                appendAnnouncementRow(newAnn);
-                alert(editMode ? 'แก้ไขประกาศ (client-only)' : 'เพิ่มประกาศ (client-only)');
+                // error saving announcement on server — report and abort (no client-only fallback)
+                if (resAnn) {
+                    const errBody = await resAnn.json().catch(() => null);
+                    const msg = (errBody && errBody.message) ? errBody.message : (resAnn.statusText || ('status ' + resAnn.status));
+                    alert('ไม่สามารถบันทึกประกาศบนเซิร์ฟเวอร์: ' + msg);
+                } else {
+                    alert('ไม่สามารถติดต่อเซิร์ฟเวอร์เพื่อบันทึกประกาศ โปรดลองอีกครั้ง');
+                }
+                return;
             }
         } else {
             const name = (document.getElementById('add-modal-name') || {}).value || '';
