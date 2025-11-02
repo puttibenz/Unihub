@@ -28,8 +28,6 @@ router.get('/announcement', async (req, res, next) => {
     }
 });
 
-module.exports = router;
-
 // GET /announcement/:id - return announcement JSON (used by modal)
 router.get('/announcement/:id', async (req, res, next) => {
     try {
@@ -58,3 +56,5 @@ router.get('/announcement/:id', async (req, res, next) => {
         return next(err);
     }
 });
+
+module.exports = router;

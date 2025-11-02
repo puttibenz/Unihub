@@ -31,38 +31,56 @@
                 <div class="featured-wrapper">
                     <h1>ประกาศล่าสุด</h1>
                     <h3>ข่าวสาร ทุนการศึกษา และการรับสมัครจากมหาวิทยาลัย</h3>
-                    <div class="card-container">
-                        <% const annSample = (typeof announcements !== 'undefined' && announcements) ? announcements : [
-                            {university:'จุฬาลงกรณ์มหาวิทยาลัย', tag:'รับสมัคร', title:'เปิดรับสมัครทุนการศึกษา ประจำปี 2026', deadline:'15 มกราคม 2026',  description:'ทุนสำหรับนักเรียนที่มีผลการเรียนดีและมีความเด่นทางกิจกรรม'} ,
-                            {university:'มหาวิทยาลัยมหิดล', tag:'ประกาศ', title:'ประกาศผลการสอบสัมภาษณ์ รอบโควตา', deadline:'28 กุมภาพันธ์ 2026',  description:'ดูรายชื่อและขั้นตอนการยืนยันสิทธิ์ที่เว็บไซต์ของคณะ'},
-                            {university:'มหาวิทยาลัยธรรมศาสตร์', tag:'ข่าว', title:'ประชาสัมพันธ์โครงการแลกเปลี่ยนต่างประเทศ', deadline:'10 มีนาคม 2026',  description:'โอกาสไปแลกเปลี่ยน 1 เทอม สำหรับนักศึกษาที่สมัครและผ่านการคัดเลือก'}
-                        ]; %>
-
-                        <% annSample.forEach(function(a){ %>
-                        <article class="card">
-                            <div class="card-header">
-                                <div class="tags">
-                                    <span class="tag university"><%= a.university %></span>
-                                    <span class="tag"><%= a.tag %></span>
-                                </div>
-                                <h3><%= a.title %></h3>
-                            </div>
-                            <div class="card-body">
-                                <p><i class="fas fa-calendar-alt"></i> วันปิดรับสมัคร / วันที่สำคัญ: <strong><%= a.deadline %></strong></p>
-                                <p class="description"><%= a.description %></p>
-                            </div>
-                            <div class="card-footer">
-                                <a href="/announcement" class="btn">ดูเพิ่มเติม</a>
-                                <div class="heart-icon">❤</div>
-                            </div>
-                        </article>
-                        <% }) %>
-
+                    <div class="card-container" id="cards">
+                        <% const anns = Array.isArray(announcements) ? announcements.slice(0,3) : []; %>
+                        <% if(!anns.length){ %>
+                            <p class="muted">ยังไม่มีประกาศในขณะนี้</p>
+                        <% } else { %>
+                            <% anns.forEach(function(a){ %>
+                            <article class="card announcement-card" data-id="<%= a.id %>" data-university="<%= a.university %>" data-faculty="<%= a.faculty %>" data-department="<%= a.department %>" data-description="<%= (a.description||'').replace(/\"/g,'&quot;') %>">
+                                <header class="card-header centered-header">
+                                    <div class="tags">
+                                        <span class="tag university"><%= a.university %></span>
+                                    </div>
+                                </header>
+                                <main class="card-body card-body-no-desc">
+                                    <h3 class="ann-title centered-title"><%= a.title %></h3>
+                                </main>
+                                <footer class="card-footer">
+                                    <% if(a.id){ %>
+                                        <a class="btn view-ann-btn" href="/announcement/<%= a.id %>" aria-label="ดูรายละเอียดประกาศ <%= a.title %>">ดูเพิ่มเติม</a>
+                                    <% } else { %>
+                                        <button class="btn view-ann-btn" aria-label="ดูเพิ่มเติม">ดูเพิ่มเติม</button>
+                                    <% } %>
+                                    <div class="heart-icon" role="img" aria-label="ชอบ">❤</div>
+                                </footer>
+                            </article>
+                            <% }) %>
+                        <% } %>
                     </div>
                     <a href="/announcement" class="btn-view-events">ดูประกาศทั้งหมด <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
         </section>
+
+        <!-- Modal for announcement details -->
+            <div id="annDetailModal" class="modal" style="display:none">
+                <div class="modal-overlay"></div>
+                <div class="modal-dialog">
+                    <button id="annClose" class="modal-close" aria-label="ปิด">×</button>
+                    <h2 id="annTitle">Title</h2>
+                    <div class="ann-tags">
+                        <span id="annUniversity" class="pill">University</span>
+                        <span id="annFaculty" class="pill">Faculty</span>
+                        <span id="annDepartment" class="pill">Department</span>
+                    </div>
+                    <hr />
+                    <div class="ann-description">
+                        <h3>Description</h3>
+                        <p id="annDescription">...</p>
+                    </div>
+                </div>
+            </div>
 
         <section class="featured">
             <div class="container">
@@ -116,5 +134,6 @@
         </section>
 
         <!-- <%- include('partials/footer') %> -->
+        <script src="/js/index.js"></script>
     </body>
 </html>

@@ -1,3 +1,268 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f4f6fb;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- Page Header --- */
+.page-header {
+    background-color: #f4f6fb;
+    padding: 80px 0 40px 0;
+    text-align: center;
+}
+
+.page-header h1 {
+    font-size: 2.8rem;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.page-header p {
+    font-size: 1.1rem;
+    color: #666;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* --- Search and Filter Section --- */
+.search-filter-section {
+    padding: 30px 0 50px 0;
+    background-color: #f4f6fb;
+}
+
+.search-filter-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.search-bar {
+    flex-grow: 1;
+    max-width: 500px;
+    position: relative;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: #333;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.search-bar input::placeholder {
+    color: #999;
+}
+
+.search-bar input:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.1);
+}
+
+.search-bar i {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    font-size: 1rem;
+}
+
+.filters {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown select {
+    appearance: none;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 12px 40px 12px 15px;
+    font-size: 1rem;
+    color: #333;
+    cursor: pointer;
+    outline: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dropdown select:hover {
+    border-color: #c0d8f0;
+}
+
+.dropdown select:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.1);
+}
+
+.dropdown i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    pointer-events: none;
+}
+
+.results-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    color: #666;
+    font-size: 0.95rem;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.results-info p {
+    margin: 0;
+    font-weight: 500;
+}
+
+.sort-by {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.sort-by i {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* --- Events Grid Section --- */
+.events-grid-section {
+    padding: 40px 0 40px 0;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 992px) {
+    .nav-links {
+        display: none; /* ซ่อน Nav links บนแท็บเล็ตและมือถือ */
+    }
+    .nav-wrapper {
+        justify-content: space-between;
+    }
+    .nav-controls {
+        order: 1; /* ย้าย controls ไปด้านขวา */
+    }
+    .search-filter-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .search-bar {
+        max-width: 100%;
+    }
+    .filters {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .dropdown {
+        flex: 1;
+        min-width: 48%;
+    }
+    .results-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header h1 {
+        font-size: 2.2rem;
+    }
+    .page-header p {
+        font-size: 1rem;
+    }
+    .card-container {
+        grid-template-columns: 1fr;
+    }
+    .card {
+        max-width: 90%;
+        margin: 0 auto;
+    }
+    .dropdown {
+        min-width: 100%;
+    }
+}
+
+/* Animation Keyframes */
+.navbar {
+    animation: fadeIn 1s ease-in-out;
+}
+
+.page-header {
+    animation: fadeIn 1.2s ease-in-out;
+}
+
+.search-filter-section {
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* Animation Keyframes */
+
+.announcement-card .centered-header { display:flex; justify-content:center; align-items:center; padding-top:6px; }
+.announcement-card .centered-title { text-align:center; font-size:1.1rem; font-weight:700; margin: 8px 0; color: #222; }
+.announcement-card .card-body-no-desc { padding: 8px 6px; }
+.announcement-card .description { display: none; }
+
 /* Announcement detail modal (custom) */
 #annDetailModal {
     position: fixed;
@@ -51,4 +316,8 @@
     #annDetailModal .modal-dialog { width: 96%; padding: 18px; border-radius: 14px; }
     #annDetailModal h2#annTitle { font-size: 20px; }
     .ann-description p { font-size: 15px; }
+}
+
+.view-ann-btn {
+    text-decoration: none;
 }

@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ประกาศมหาวิทยาลัย</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="/css/style_events.css">
     <link rel="stylesheet" href="/css/style_announcement.css">
     <link rel="stylesheet" href="/css/user_btn.css">
     <link rel="stylesheet" href="/css/nav.css">
@@ -60,15 +59,14 @@
                             <p class="muted">ยังไม่มีประกาศในขณะนี้</p>
                         <% } else { %>
                             <% anns.forEach(function(a){ %>
-                            <article class="card announcement-card" data-id="<%= a.id %>" data-university="<%= a.university %>" data-faculty="<%= a.faculty %>" data-department="<%= a.department %>">
-                                <header class="card-header">
+                            <article class="card announcement-card" data-id="<%= a.id %>" data-university="<%= a.university %>" data-faculty="<%= a.faculty %>" data-department="<%= a.department %>" data-description="<%= (a.description||'').replace(/\"/g,'&quot;') %>">
+                                <header class="card-header centered-header">
                                     <div class="tags">
                                         <span class="tag university"><%= a.university %></span>
                                     </div>
-                                    <h3 class="ann-title"><%= a.title %></h3>
                                 </header>
-                                <main class="card-body">
-                                    <p class="description"><%= a.description %></p>
+                                <main class="card-body card-body-no-desc">
+                                    <h3 class="ann-title centered-title"><%= a.title %></h3>
                                 </main>
                                 <footer class="card-footer">
                                     <% if(a.id){ %>
