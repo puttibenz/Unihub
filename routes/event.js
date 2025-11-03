@@ -29,11 +29,12 @@ router.get('/event', async (req, res, next) => {
             return {
                 id: r.id,
                 title: r.title || '',
-                uniAbbreviation: r.Abbreviation || '',
+                uniAbbreviation: r.abbreviation || '',
                 date: dateStr,
                 time: timeStr,
                 location: r.location || '',
                 description: r.description || '',
+                category: r.category || '',
                 faculty: r.faculty || null,
                 department: r.department || null
             };

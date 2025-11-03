@@ -262,10 +262,10 @@ function appendEventRow(ev) {
     tr.dataset.startTime = ev.start_time || ev.start || '';
     tr.dataset.endTime = ev.end_time || ev.end || '';
     tr.dataset.category = ev.category || '';
-    tr.dataset.university = ev.university || '';
+        tr.dataset.university = ev.abbreviation || '';
     tr.dataset.faculty = ev.faculty || '';
     tr.dataset.department = ev.department || '';
-    tr.innerHTML = `<td>${escapeHtml(ev.title || '')}</td><td>${escapeHtml(ev.description || '-')}</td><td>${escapeHtml(ev.category || '-')}</td><td>${escapeHtml(ev.university || '-')}</td><td>${escapeHtml(ev.faculty || '-')}</td><td>${escapeHtml(ev.department || '-')}</td><td class="actions"><button class="icon-btn" data-id="${ev.id || ''}" onclick="onEdit('event', this.dataset.id)">✎</button><button class="icon-btn" data-id="${ev.id || ''}" onclick="onDelete('event', this.dataset.id)">🗑</button></td>`;
+    tr.innerHTML = `<td>${escapeHtml(ev.title || '')}</td><td>${escapeHtml(ev.description || '-')}</td><td>${escapeHtml(ev.category || '-')}</td><td>${escapeHtml(ev.abbreviation || '-')}</td><td>${escapeHtml(ev.faculty || '-')}</td><td>${escapeHtml(ev.department || '-')}</td><td class="actions"><button class="icon-btn" data-id="${ev.id || ''}" onclick="onEdit('event', this.dataset.id)">✎</button><button class="icon-btn" data-id="${ev.id || ''}" onclick="onDelete('event', this.dataset.id)">🗑</button></td>`;
     tbody.appendChild(tr);
 }
 

@@ -27,14 +27,13 @@ router.get('/', async (req,res, next) => {
 
             return {
                 id: r.id,
-                tag: r.tag || '',
-                university: r.university || '',
                 title: r.title || '',
+                uniAbbreviation: r.abbreviation || '',
                 date: dateStr,
                 time: timeStr,
                 location: r.location || '',
-                interested: r.interested || undefined,
                 description: r.description || '',
+                category: r.category || '',
                 faculty: r.faculty || null,
                 department: r.department || null
             };

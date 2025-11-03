@@ -47,7 +47,15 @@
                                 <div class="card">
                                     <div class="card-header">
                                         <div class="tags">
-                                            <span class="tag university"><%= ev.university || 'มหาวิทยาลัย' %></span>
+                                            <span class="tag university"><%= ev.abbreviation || ev.university || 'มหาวิทยาลัย' %></span>
+                                            <!-- university -->
+                                            <% if (ev.faculty) { %>
+                                                <span class="tag faculty"><%= ev.faculty %></span>
+                                            <% } %>
+                                            <!-- department (if available) -->
+                                            <% if (ev.department) { %>
+                                                <span class="tag department"><%= ev.department %></span>
+                                            <% } %>          
                                         </div>
                                         <h3><%= ev.title %></h3>
                                     </div>

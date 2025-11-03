@@ -91,15 +91,11 @@
             <div class="card-container">
                 <% (events || []).forEach(function(ev){ %>
                     <% const tagClass = (ev.tag || '').toLowerCase().includes('openhouse') ? 'openhouse' : (ev.tag || '').toLowerCase().includes('academic') ? 'academic' : (ev.tag || '').toLowerCase().includes('social') ? 'social' : 'university'; %>
-                    <div class="card" data-event-id="<%= ev.id %>" data-university="<%= ev.university %>" data-tag="<%= ev.tag %>" data-faculty="<%= ev.faculty || '' %>" data-department="<%= ev.department || '' %>">
+                    <div class="card" data-event-id="<%= ev.id %>" data-university="<%= ev.uniabbreviation || '' %>" data-tag="<%= ev.tag %>" data-faculty="<%= ev.faculty || '' %>" data-department="<%= ev.department || '' %>">
                     <div class="card-header">
                         <div class="tags">
-                            <!-- category / type (only render when present) -->
-                            <% if (ev.category || ev.tag) { %>
-                                <span class="tag <%= tagClass %>"><%= ev.category || ev.tag %></span>
-                            <% } %>
                             <!-- university -->
-                            <span class="tag university"><%= ev.university || '' %></span>
+                            <span class="tag university"><%= ev.uniAbbreviation || '' %></span>
                             <!-- faculty (if available) -->
                             <% if (ev.faculty) { %>
                                 <span class="tag faculty"><%= ev.faculty %></span>
@@ -107,6 +103,10 @@
                             <!-- department (if available) -->
                             <% if (ev.department) { %>
                                 <span class="tag department"><%= ev.department %></span>
+                            <% } %>
+                            <!-- category / type (only render when present) -->
+                            <% if (ev.category || ev.tag) { %>
+                                <span class="tag category<%= tagClass %>"><%= ev.category || ev.tag %></span>
                             <% } %>
                         </div>
                         <h3><%= ev.title %></h3>
