@@ -9,16 +9,44 @@ router.get('/profile', async (req, res, next) => {
         }
 
         const userId = req.session.user.id;
-        const sql = `SELECT r.User_ID as user_id, r.Event_ID as event_id, r.Status as status,
-                        e.ID as id, e.Title as title, e.description as description, e.location as location, e.start_time as start_time, e.end_time as end_time,
-                        u.Name as university
-                    FROM register r
-                    LEFT JOIN events e ON r.Event_ID = e.ID
-                    LEFT JOIN university u ON e.university_ID = u.ID
-                    WHERE r.User_ID = ? AND (r.Status = 'joined' OR r.Status IS NULL)
-                    ORDER BY e.start_time DESC`;
+     // New schema: registrations and events are split by scope (_department/_faculty/_university).
+     // Query all three register_* tables and join to their corresponding event_* tables, then normalize.
+     const sql = `
+         SELECT r.User_ID as user_id, r.Event_ID as event_id, r.Status as status,
+             e.Event_ID as id, e.Title as title, e.Description as description, e.Location as location, e.Start_time as start_time, e.End_time as end_time,
+             u.Name as university
+         FROM Register_department r
+         LEFT JOIN event_department e ON r.Event_ID = e.Event_ID
+         LEFT JOIN department d ON e.Department_ID = d.ID
+         LEFT JOIN faculty f ON d.Faculty_ID = f.ID
+         LEFT JOIN university u ON f.University_ID = u.ID
+         WHERE r.User_ID = ? AND (r.Status = 'joined' OR r.Status IS NULL)
 
-        const [rows] = await db.query(sql, [userId]);
+         UNION ALL
+
+         SELECT r.User_ID as user_id, r.Event_ID as event_id, r.Status as status,
+             e.Event_ID as id, e.Title as title, e.Description as description, e.Location as location, e.Start_time as start_time, e.End_time as end_time,
+             u.Name as university
+         FROM Register_faculty r
+         LEFT JOIN event_faculty e ON r.Event_ID = e.Event_ID
+         LEFT JOIN faculty f ON e.Faculty_ID = f.ID
+         LEFT JOIN university u ON f.University_ID = u.ID
+         WHERE r.User_ID = ? AND (r.Status = 'joined' OR r.Status IS NULL)
+
+         UNION ALL
+
+         SELECT r.User_ID as user_id, r.Event_ID as event_id, r.Status as status,
+             e.Event_ID as id, e.Title as title, e.Description as description, e.Location as location, e.Start_time as start_time, e.End_time as end_time,
+             u.Name as university
+         FROM Register_university r
+         LEFT JOIN event_university e ON r.Event_ID = e.Event_ID
+         LEFT JOIN university u ON e.University_ID = u.ID
+         WHERE r.User_ID = ? AND (r.Status = 'joined' OR r.Status IS NULL)
+
+         ORDER BY start_time DESC
+     `;
+
+     const [rows] = await db.query(sql, [userId, userId, userId]);
 
         const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
         const registeredEvents = (rows || []).map(r => {

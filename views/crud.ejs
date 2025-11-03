@@ -126,7 +126,8 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>Title</th>   
+                                <th>Title</th>
+                                <th>Description</th>
                                 <th>Category</th>
                                 <th>University</th>
                                 <th>Faculty</th>
@@ -137,8 +138,20 @@
                         <tbody>
                             <% const evSample = (typeof events !== 'undefined' && events) ? events : []; %>
                             <% evSample.forEach(function(e){ %>
-                                <tr data-category="<%= (e.category || '') %>">
+                                <tr
+                                    data-id="<%= e.id || '' %>"
+                                    data-title="<%= (e.title || e.Title || '') %>"
+                                    data-description="<%= (e.description || e.Description || '') %>"
+                                    data-location="<%= (e.location || e.Location || '') %>"
+                                    data-start-time="<%= (e.start_time || e.Start_time || '') %>"
+                                    data-end-time="<%= (e.end_time || e.End_time || '') %>"
+                                    data-category="<%= (e.category || '') %>"
+                                    data-university="<%= (e.university || '') %>"
+                                    data-faculty="<%= (e.faculty || '') %>"
+                                    data-department="<%= (e.department || '') %>"
+                                >
                                     <td><%= e.title || e.Title || 'Untitled' %></td>
+                                    <td><%= e.description || e.Description || '-' %></td>
                                     <td><%= e.category || '-' %></td>
                                     <td><%= e.university || '-' %></td>
                                     <td><%= e.faculty || '-' %></td>
@@ -195,6 +208,8 @@
                                 <div id="form-university" class="hidden">
                                     <label class="form-label">ชื่อมหาวิทยาลัย</label>
                                     <input id="uni-name" type="text" placeholder="ชื่อมหาวิทยาลัย" class="form-control" />
+                                    <label class="form-label">ชื่อย่อ</label>
+                                    <input id="uni-abbreviation" type="text" placeholder="ชื่อย่อ" class="form-control" />
                                     <label class="form-label">ที่ตั้ง</label>
                                     <input id="uni-location" type="text" placeholder="เช่น กรุงเทพมหานคร" class="form-control" />
                                     <label class="form-label">เว็บไซต์</label>

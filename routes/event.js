@@ -1,21 +1,14 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const db = require('../db');
+const dbHelpers = require('./dbHelpers');
 const router = express.Router();
 
 // Route: หน้าแสดงกิจกรรม
 router.get('/event', async (req, res, next) => {
     try {
-        const sql = `SELECT e.ID as id, e.Title as title, e.description as description, e.location as location, e.start_time as start_time, e.end_time as end_time, c.Name as tag, u.Name as university, f.Name as faculty, d.Name as department
-                     FROM events e
-                     LEFT JOIN category c ON e.category_ID = c.ID
-                     LEFT JOIN university u ON e.university_ID = u.ID
-                     LEFT JOIN faculty f ON e.faculty_ID = f.ID
-                     LEFT JOIN department d ON e.Department_ID = d.ID
-                     ORDER BY e.start_time DESC`;
-
-        const [rows] = await db.query(sql);
-        const events = (rows || []).map(r => {
+    const rows = await dbHelpers.listEvents(100);
+    const events = (rows || []).map(r => {
             let dateStr = '';
             let timeStr = '';
             try{
@@ -35,13 +28,11 @@ router.get('/event', async (req, res, next) => {
 
             return {
                 id: r.id,
-                tag: r.tag || '',
-                university: r.university || '',
                 title: r.title || '',
+                uniAbbreviation: r.Abbreviation || '',
                 date: dateStr,
                 time: timeStr,
                 location: r.location || '',
-                interested: r.interested || undefined,
                 description: r.description || '',
                 faculty: r.faculty || null,
                 department: r.department || null
@@ -58,24 +49,15 @@ router.get('/event', async (req, res, next) => {
 // shared unregister logic used by both PATCH (preferred) and POST (fallback for non-JS forms)
 async function performUnregister(userId, eventId, req, res, next) {
     try {
-        const updateSql = `UPDATE register SET Status = 'cancelled', cancelled_at = NOW() WHERE User_ID = ? AND Event_ID = ? AND (Status = 'joined' OR Status IS NULL)`;
-        const [result] = await db.query(updateSql, [userId, eventId]);
-        if (!result || result.affectedRows === 0) {
-            const delSql = `DELETE FROM register WHERE User_ID = ? AND Event_ID = ?`;
-            const [delRes] = await db.query(delSql, [userId, eventId]);
-            if (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
-                return res.json({ success: true, action: 'deleted' });
-            }
-            return res.redirect('/profile');
-        }
+        const result = await dbHelpers.unregisterUserFromEvent(userId, eventId);
         if (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
-            return res.json({ success: true, action: 'updated' });
+            return res.json({ success: true, action: result.action });
         }
         return res.redirect('/profile');
     } catch (err) {
         console.error('Error updating register status:', err);
         if (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
-            return res.status(500).json({ success: false, message: 'Database error' });
+            return res.status(500).json({ success: false, message: err.message || 'Database error' });
         }
         return next(err);
     }
@@ -120,25 +102,17 @@ router.post('/event/register', async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'eventId is required' });
         }
 
-        const [evRows] = await db.query('SELECT ID, University_ID FROM events WHERE ID = ? LIMIT 1', [eventId]);
-        if (!evRows || evRows.length === 0) {
-            return res.status(404).json({ success: false, message: 'Event not found' });
+        try {
+            const r = await dbHelpers.registerUserToEvent(userId, eventId);
+            if (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
+                return res.status(201).json({ success: true, id: r.id, scope: r.scope });
+            }
+            return res.redirect('/profile');
+        } catch (err) {
+            if (err && err.message === 'already_registered') return res.status(409).json({ success: false, message: 'Already registered' });
+            if (err && err.message === 'event_not_found') return res.status(404).json({ success: false, message: 'Event not found' });
+            throw err;
         }
-        const ev = evRows[0];
-        if (!ev.University_ID) {
-            return res.status(400).json({ success: false, message: 'Event must be associated with a university' });
-        }
-
-        const [sRows] = await db.query('SELECT * FROM register WHERE User_ID = ? AND Event_ID = ? LIMIT 1', [userId, eventId]);
-        if (sRows && sRows.length > 0) {
-            return res.status(409).json({ success: false, message: 'Already registered' });
-        }
-
-        const [result] = await db.query('INSERT INTO register (User_ID, Event_ID, Status) VALUES (?, ?, ?)', [userId, eventId, 'joined']);
-        if (req.headers && req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
-            return res.status(201).json({ success: true, id: result.insertId });
-        }
-        return res.redirect('/profile');
     } catch (err) {
         console.error('DB error in /event/register:', err);
         return next(err);

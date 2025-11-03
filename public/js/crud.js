@@ -136,6 +136,7 @@ const formUniversity = document.getElementById('form-university');
 const formFaculty = document.getElementById('form-faculty');
 const formDepartment = document.getElementById('form-department');
 const uniNameInput = document.getElementById('uni-name');
+const uniAbbreviationInput = document.getElementById('uni-abbreviation');
 const uniLocationInput = document.getElementById('uni-location');
 const uniWebsiteInput = document.getElementById('uni-website');
 const uniEmailInput = document.getElementById('uni-email');
@@ -253,8 +254,18 @@ function appendEventRow(ev) {
     const tbody = document.querySelector('#panel-events tbody');
     if (!tbody) return;
     const tr = document.createElement('tr');
+    // store full event data in data- attributes for editing (table shows a compact set of columns)
+    tr.dataset.id = ev.id || '';
+    tr.dataset.title = ev.title || '';
+    tr.dataset.description = ev.description || '';
+    tr.dataset.location = ev.location || '';
+    tr.dataset.startTime = ev.start_time || ev.start || '';
+    tr.dataset.endTime = ev.end_time || ev.end || '';
     tr.dataset.category = ev.category || '';
-    tr.innerHTML = `<td>${escapeHtml(ev.title || '')}</td><td>${escapeHtml(ev.description || '-')}</td><td>${escapeHtml(ev.location || '-')}</td><td>${escapeHtml(ev.start_time || '-')}</td><td>${escapeHtml(ev.end_time || '-')}</td><td>${escapeHtml(ev.category || '-')}</td><td>${escapeHtml(ev.university || '-')}</td><td>${escapeHtml(ev.faculty || '-')}</td><td>${escapeHtml(ev.department || '-')}</td><td class="actions"><button class="icon-btn" data-id="${ev.id || ''}" onclick="onEdit('event', this.dataset.id)">✎</button><button class="icon-btn" data-id="${ev.id || ''}" onclick="onDelete('event', this.dataset.id)">🗑</button></td>`;
+    tr.dataset.university = ev.university || '';
+    tr.dataset.faculty = ev.faculty || '';
+    tr.dataset.department = ev.department || '';
+    tr.innerHTML = `<td>${escapeHtml(ev.title || '')}</td><td>${escapeHtml(ev.description || '-')}</td><td>${escapeHtml(ev.category || '-')}</td><td>${escapeHtml(ev.university || '-')}</td><td>${escapeHtml(ev.faculty || '-')}</td><td>${escapeHtml(ev.department || '-')}</td><td class="actions"><button class="icon-btn" data-id="${ev.id || ''}" onclick="onEdit('event', this.dataset.id)">✎</button><button class="icon-btn" data-id="${ev.id || ''}" onclick="onDelete('event', this.dataset.id)">🗑</button></td>`;
     tbody.appendChild(tr);
 }
 
@@ -348,7 +359,7 @@ addModalForm.addEventListener('submit', async (e) => {
          if (type === 'university') {
             const editMode = addModal.dataset.editMode === 'true';
            const editId = addModal.dataset.editId || null;
-            const payload = { name: uniNameInput.value.trim(), location: uniLocationInput.value.trim(), website: uniWebsiteInput.value.trim(), email: uniEmailInput.value.trim() || null, phone: uniContactInput.value.trim() || null };
+            const payload = { name: uniNameInput.value.trim(), abbreviation: uniAbbreviationInput.value.trim(), location: uniLocationInput.value.trim(), website: uniWebsiteInput.value.trim(), email: uniEmailInput.value.trim() || null, phone: uniContactInput.value.trim() || null };
             if (!payload.name) return alert('กรุณากรอกชื่อมหาวิทยาลัย');
             if (editMode && editId) {
                 const res = await fetch('/admin/universities/' + editId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -360,7 +371,7 @@ addModalForm.addEventListener('submit', async (e) => {
                 const res = await fetch('/admin/universities', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(data.message || 'Server error');
-                const newUni = { id: String(data.id), name: payload.name, location: payload.location, website: payload.website, email: payload.email, phone: payload.phone };
+                const newUni = { id: String(data.id), name: payload.name, abbreviation: payload.abbreviation, location: payload.location, website: payload.website, email: payload.email, phone: payload.phone };
                 _UNIS.push(newUni);
                 window.__UNIVERSITIES = _UNIS;
                 populateUniversitySelect(facUniversitySelect);
@@ -430,6 +441,7 @@ addModalForm.addEventListener('submit', async (e) => {
                 facultyId: facId,
                 faculty: facName,
                 major: depName || null,
+                departmentId: depId || null,
                 title: eventTitleInput.value.trim() || '',
                 description: eventDescriptionInput.value.trim() || '',
                 location: eventLocationInput.value.trim() || '',
@@ -462,7 +474,7 @@ addModalForm.addEventListener('submit', async (e) => {
             let res;
             try {
                 if (editMode && editId) {
-                    res = await fetch('/admin/events/' + editId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: payload.title, description: payload.description, location: payload.location, startTime: payload.startTime, endTime: payload.endTime, category: payload.category, university: payload.university, faculty: payload.faculty, department: payload.major }) });
+                    res = await fetch('/admin/events/' + editId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: payload.title, description: payload.description, location: payload.location, startTime: payload.startTime, endTime: payload.endTime, category: payload.category, university: payload.university, universityId: payload.universityId, faculty: payload.faculty, facultyId: payload.facultyId, department: payload.major, departmentId: payload.departmentId }) });
                 } else {
                     res = await fetch('/admin/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 }
@@ -598,39 +610,34 @@ async function onEdit(type, id) {
     }
 
     if (type === 'event') {
-        // find the table row for this event id and populate event form
+        // populate event form from data-* attributes on the row (we keep table compact)
         const btn = document.querySelector('#panel-events button.icon-btn[data-id="' + parsedId + '"]');
         const tr = btn ? btn.closest('tr') : null;
-        const cells = tr ? Array.from(tr.querySelectorAll('td')) : [];
-        // expected columns: title(0), description(1), location(2), start(3), end(4), category(5), university(6), faculty(7), department(8)
-        if (document.getElementById('form-event')) {
+        if (document.getElementById('form-event') && tr) {
             document.getElementById('form-event').classList.remove('hidden');
             populateUniversitySelect(eventUniversitySelect);
-            eventTitleInput.value = (cells[0] && cells[0].textContent) ? cells[0].textContent.trim() : '';
-            eventDescriptionInput.value = (cells[1] && cells[1].textContent) ? cells[1].textContent.trim() : '';
-            eventLocationInput.value = (cells[2] && cells[2].textContent) ? cells[2].textContent.trim() : '';
-            try { if (cells[3] && cells[3].textContent) eventStartInput.value = (new Date(cells[3].textContent.trim())).toISOString().slice(0,16); } catch(e) {}
-            try { if (cells[4] && cells[4].textContent) eventEndInput.value = (new Date(cells[4].textContent.trim())).toISOString().slice(0,16); } catch(e) {}
-            if (cells[5] && cells[5].textContent) eventCategorySelect.value = cells[5].textContent.trim();
-            if (cells[6] && cells[6].textContent) {
-                const uniName = cells[6].textContent.trim();
-                const uniOption = Array.from(eventUniversitySelect.options).find(o => (o.textContent || '').trim() === uniName);
+            eventTitleInput.value = (tr.dataset.title || '').trim();
+            eventDescriptionInput.value = (tr.dataset.description || '').trim();
+            eventLocationInput.value = (tr.dataset.location || '').trim();
+            try { if (tr.dataset.startTime) eventStartInput.value = (new Date(tr.dataset.startTime)).toISOString().slice(0,16); } catch(e) {}
+            try { if (tr.dataset.endTime) eventEndInput.value = (new Date(tr.dataset.endTime)).toISOString().slice(0,16); } catch(e) {}
+            if (tr.dataset.category) eventCategorySelect.value = tr.dataset.category;
+            // select university option by displayed name
+            if (tr.dataset.university) {
+                const uniOption = Array.from(eventUniversitySelect.options).find(o => (o.textContent || '').trim() === tr.dataset.university.trim());
                 if (uniOption) eventUniversitySelect.value = uniOption.value;
             }
             // populate faculties after university selected
             await populateFacultySelectForUniversity(eventFacultySelect, eventUniversitySelect.value || '');
-            if (cells[7] && cells[7].textContent) {
-                const facName = cells[7].textContent.trim();
-                const facOption = Array.from(eventFacultySelect.options).find(o => (o.textContent || '').trim() === facName);
+            if (tr.dataset.faculty) {
+                const facOption = Array.from(eventFacultySelect.options).find(o => (o.textContent || '').trim() === tr.dataset.faculty.trim());
                 if (facOption) eventFacultySelect.value = facOption.value;
             }
-            // try to set department (major) select
-            if (cells[8] && cells[8].textContent) {
-                const depName = cells[8].textContent.trim();
-                // try to find in department select (if it's a datalist/select)
-                const depOpt = Array.from((eventMajorInput.options || [])).find(o => (o.textContent || '').trim() === depName);
+            // set department select if possible
+            if (tr.dataset.department) {
+                const depOpt = Array.from((eventMajorInput.options || [])).find(o => (o.textContent || '').trim() === tr.dataset.department.trim());
                 if (depOpt) eventMajorInput.value = depOpt.value;
-                else eventMajorInput.value = depName;
+                else eventMajorInput.value = tr.dataset.department;
             }
         }
     }

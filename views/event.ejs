@@ -94,8 +94,20 @@
                     <div class="card" data-event-id="<%= ev.id %>" data-university="<%= ev.university %>" data-tag="<%= ev.tag %>" data-faculty="<%= ev.faculty || '' %>" data-department="<%= ev.department || '' %>">
                     <div class="card-header">
                         <div class="tags">
-                            <span class="tag <%= tagClass %>"><%= ev.tag %></span>
-                            <span class="tag university"><%= ev.university %></span>
+                            <!-- category / type (only render when present) -->
+                            <% if (ev.category || ev.tag) { %>
+                                <span class="tag <%= tagClass %>"><%= ev.category || ev.tag %></span>
+                            <% } %>
+                            <!-- university -->
+                            <span class="tag university"><%= ev.university || '' %></span>
+                            <!-- faculty (if available) -->
+                            <% if (ev.faculty) { %>
+                                <span class="tag faculty"><%= ev.faculty %></span>
+                            <% } %>
+                            <!-- department (if available) -->
+                            <% if (ev.department) { %>
+                                <span class="tag department"><%= ev.department %></span>
+                            <% } %>
                         </div>
                         <h3><%= ev.title %></h3>
                     </div>
