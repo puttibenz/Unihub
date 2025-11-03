@@ -46,8 +46,6 @@ router.get('/question', async (req, res, next) => {
   }
 });
 
-module.exports = router;
-
 function sanitize(str){ return String(str||'').trim(); }
 
 // Create a new question (Post)
@@ -60,7 +58,7 @@ router.post('/api/posts', async (req,res,next)=>{
         if(title.length > 200) return res.status(400).json({error:'Title too long'});
         const [insert] = await db.query('INSERT INTO Post (Title, Content, User_ID) VALUES (?,?,?)',[title, body, userId]);
         const [rows] = await db.query(`SELECT p.Post_ID as id, p.Title as title, p.Content as body, DATE_FORMAT(p.Create_at, "%Y-%m-%d") as createdAt, p.User_ID, u.first_name
-                                FROM Post p LEFT JOIN users u ON p.User_ID = u.ID WHERE p.Post_ID=?`,[insert.insertId]);
+                                       FROM Post p LEFT JOIN users u ON p.User_ID = u.ID WHERE p.Post_ID=?`,[insert.insertId]);
         const row = rows[0];
         res.json({ id: row.id, title: row.title, body: row.body, createdAt: row.createdAt, author: row.first_name || (row.User_ID?`User#${row.User_ID}`:'Anonymous'), likes:0, views:0, tags:[], answers:[] });
     } catch (err) { next(err); }
@@ -75,8 +73,10 @@ router.post('/api/posts/:id/comments', async (req,res,next)=>{
         if(!postId || !body) return res.status(400).json({error:'Missing data'});
         const [insert] = await db.query('INSERT INTO Comment (Content, Post_ID, User_ID) VALUES (?,?,?)',[body, postId, userId]);
         const [rows] = await db.query(`SELECT c.Comment_ID as id, c.Content as body, DATE_FORMAT(c.Create_at, "%Y-%m-%d") as createdAt, c.User_ID, u.first_name
-                                FROM Comment c LEFT JOIN users u ON c.User_ID = u.ID WHERE c.Comment_ID=?`,[insert.insertId]);
+                                       FROM Comment c LEFT JOIN users u ON c.User_ID = u.ID WHERE c.Comment_ID=?`,[insert.insertId]);
         const row = rows[0];
         res.json({ id: row.id, body: row.body, createdAt: row.createdAt, author: row.first_name || (row.User_ID?`User#${row.User_ID}`:'Anonymous') });
     } catch (err) { next(err); }
 });
+
+module.exports = router;

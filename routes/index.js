@@ -41,7 +41,7 @@ router.get('/', async (req,res, next) => {
 
         // fetch latest 3 announcements using helpers
         const annRows = await dbHelpers.listLatestAnnouncements(3);
-        const announcements = (annRows || []).map(r => ({ id: r.id, scope: r.scope, title: r.title || '', description: r.description || '', university: r.university || '', faculty: r.faculty || '', department: r.department || '' }));
+        const announcements = (annRows || []).map(r => ({ id: r.id, scope: r.scope, title: r.title || '', content: r.content || '', university: r.university || '', faculty: r.faculty || '', department: r.department || '' }));
 
         return res.render('index', {title:'Index', events, announcements});
     } catch (err) { return next(err); }

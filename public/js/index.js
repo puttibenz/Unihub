@@ -7,7 +7,7 @@
     const annUniversity = document.getElementById('annUniversity');
     const annFaculty = document.getElementById('annFaculty');
     const annDepartment = document.getElementById('annDepartment');
-    const annDescription = document.getElementById('annDescription');
+    const annContent = document.getElementById('annContent');
     const annClose = document.getElementById('annClose');
 
     function openModal(){ if(modal) modal.style.display = 'flex'; }
@@ -41,15 +41,15 @@
             // fallback to card DOM (use data-description attribute) if server data not available
             if (!data) {
                 const title = card.querySelector('.ann-title') ? card.querySelector('.ann-title').textContent.trim() : '';
-                const desc = card.dataset.description || '';
-                data = { title: title || 'ประกาศ', description: desc || '', university: card.dataset.university || '', faculty: card.dataset.faculty || '', department: card.dataset.department || '' };
+                const content = card.dataset.content || '';
+                data = { title: title || 'ประกาศ', content: content || '', university: card.dataset.university || '', faculty: card.dataset.faculty || '', department: card.dataset.department || '' };
             }
 
             if(annTitle) annTitle.textContent = data.title || 'ประกาศ';
             if(annUniversity) annUniversity.textContent = data.university || '';
             if(annFaculty) annFaculty.textContent = data.faculty || '';
             if(annDepartment) annDepartment.textContent = data.department || '';
-            if(annDescription) annDescription.textContent = data.description || '';
+            if(annContent) annContent.textContent = data.content || '';
 
             openModal();
         });

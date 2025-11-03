@@ -393,10 +393,14 @@ router.put('/admin/events/:id', async (req, res, next) => {
     try {
         const id = Number(req.params.id || 0);
         if (!id) return res.status(400).json({ success: false, message: 'Invalid event id' });
-
         const uniRaw = req.body.university ?? req.body.University;
         const facRaw = req.body.faculty ?? req.body.Faculty;
         const depRaw = req.body.department ?? req.body.Department;
+        // accept id candidates as well (admin client may send ids)
+        const uniIdCandidate = req.body.universityId ?? req.body.uniId ?? null;
+        const facIdCandidate = req.body.facultyId ?? req.body.facId ?? null;
+        const depIdCandidate = req.body.departmentId ?? req.body.majorId ?? null;
+        const isId = v => v != null && String(v).match(/^\d+$/);
         const { title, description, location } = req.body;
         const startRaw = req.body.start_time ?? req.body.startTime ?? req.body.start ?? req.body.start_date ?? req.body.startDate;
         const endRaw = req.body.end_time ?? req.body.endTime ?? req.body.end ?? req.body.end_date ?? req.body.endDate;

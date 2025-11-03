@@ -25,7 +25,37 @@ async function listLatestAnnouncements(limit = 10) {
     return rows || [];
 }
 
-async function getAnnouncementById(id) {
+async function getAnnouncementById(id, scope = null) {
+    // If scope is provided, query the corresponding table directly to avoid ambiguity when IDs overlap across tables.
+    if (scope === 'department') {
+        const sql = `SELECT 'department' AS scope, a.ID as id, a.Title as title, a.Content as content, u.Name as university, f.Name as faculty, d.Name as department
+            FROM announcement_department a
+            LEFT JOIN department d ON a.Department_ID = d.ID
+            LEFT JOIN faculty f ON d.Faculty_ID = f.ID
+            LEFT JOIN university u ON f.University_ID = u.ID
+            WHERE a.ID = ? LIMIT 1`;
+        const [rows] = await db.query(sql, [id]);
+        return (rows && rows[0]) || null;
+    }
+    if (scope === 'faculty') {
+        const sql = `SELECT 'faculty' AS scope, a.ID as id, a.Title as title, a.Content as content, u.Name as university, f.Name as faculty, NULL as department
+            FROM announcement_faculty a
+            LEFT JOIN faculty f ON a.Faculty_ID = f.ID
+            LEFT JOIN university u ON f.University_ID = u.ID
+            WHERE a.ID = ? LIMIT 1`;
+        const [rows] = await db.query(sql, [id]);
+        return (rows && rows[0]) || null;
+    }
+    if (scope === 'university') {
+        const sql = `SELECT 'university' AS scope, a.ID as id, a.Title as title, a.Content as content, u.Name as university, NULL as faculty, NULL as department
+            FROM announcement_university a
+            LEFT JOIN university u ON a.University_ID = u.ID
+            WHERE a.ID = ? LIMIT 1`;
+        const [rows] = await db.query(sql, [id]);
+        return (rows && rows[0]) || null;
+    }
+
+    // Fallback: try all scopes (department -> faculty -> university) and return the first match
     const sql = `
         SELECT scope, id, title, content, university, faculty, department FROM (
             SELECT 'department' AS scope, a.ID as id, a.Title as title, a.Content as content, u.Name as university, f.Name as faculty, d.Name as department

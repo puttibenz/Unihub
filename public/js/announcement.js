@@ -30,7 +30,7 @@
     const annUniversity = document.getElementById('annUniversity');
     const annFaculty = document.getElementById('annFaculty');
     const annDepartment = document.getElementById('annDepartment');
-    const annDescription = document.getElementById('annDescription');
+    const annContent = document.getElementById('annContent');
     const annClose = document.getElementById('annClose');
 
     function openModal(){ if(modal) modal.style.display = 'flex'; }
@@ -45,9 +45,12 @@
             if(!card) return;
             const id = card.dataset.id;
             let data = null;
-            if (id) {
+                if (id) {
                 try {
-                    const resp = await fetch('/announcement/' + encodeURIComponent(id), { headers: { 'Accept': 'application/json' } });
+                    // include card scope if present to disambiguate ID across announcement_* tables
+                    const scope = card.dataset.scope || '';
+                    const url = '/announcement/' + encodeURIComponent(id) + (scope ? ('?scope=' + encodeURIComponent(scope)) : '');
+                    const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
                     if (resp && resp.ok) {
                         const json = await resp.json().catch(() => null);
                         if (json && json.success && json.announcement) data = json.announcement;
@@ -72,7 +75,7 @@
             if(annUniversity) annUniversity.textContent = data.university || '';
             if(annFaculty) annFaculty.textContent = data.faculty || '';
             if(annDepartment) annDepartment.textContent = data.department || '';
-            if(annDescription) annDescription.textContent = data.description || '';
+            if(annContent) annContent.textContent = data.content || '';
 
             openModal();
         });

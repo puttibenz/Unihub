@@ -18,9 +18,11 @@ router.get('/announcement/:id', async (req, res, next) => {
     try {
         const id = parseInt(req.params.id, 10);
         if (!id) return res.status(400).json({ success: false, message: 'Invalid id' });
-        const r = await dbHelpers.getAnnouncementById(id);
+        // accept optional scope query param to disambiguate IDs that may overlap across tables
+        const scope = req.query.scope || null;
+        const r = await dbHelpers.getAnnouncementById(id, scope);
         if (!r) return res.status(404).json({ success: false, message: 'Not found' });
-        const announcement = { id: r.id, title: r.title || '', description: r.description || '', university: r.university || '', faculty: r.faculty || '', department: r.department || '' };
+        const announcement = { id: r.id, title: r.title || '', content: r.content || '', university: r.university || '', faculty: r.faculty || '', department: r.department || '' };
         return res.json({ success: true, announcement });
     } catch (err) {
         console.error('Error fetching announcement by id:', err);
