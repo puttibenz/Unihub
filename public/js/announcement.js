@@ -33,7 +33,6 @@
     const annContent = document.getElementById('annContent');
     const annClose = document.getElementById('annClose');
 
-    function openModal(){ if(modal) modal.style.display = 'flex'; }
     function openModal(){ if(modal){ modal.style.display = 'flex'; modal.classList.add('open'); } }
     function closeModal(){ if(modal){ modal.style.display = 'none'; modal.classList.remove('open'); } }
 
@@ -72,10 +71,31 @@
             }
 
             if(annTitle) annTitle.textContent = data.title || 'ประกาศ';
-            if(annUniversity) annUniversity.textContent = data.university || '';
-            if(annFaculty) annFaculty.textContent = data.faculty || '';
-            if(annDepartment) annDepartment.textContent = data.department || '';
-            if(annContent) annContent.textContent = data.content || '';
+            if(annUniversity) {
+                if (data.university) {
+                    annUniversity.textContent = data.university;
+                    annUniversity.style.display = '';
+                } else {
+                    annUniversity.style.display = 'none';
+                }
+            }
+            if (annFaculty) {
+                if (data.faculty) {
+                    annFaculty.textContent = data.faculty;
+                    annFaculty.style.display = '';
+                } else {
+                    annFaculty.style.display = 'none';
+                }
+            }
+            if (annDepartment) {
+                if (data.department) {
+                    annDepartment.textContent = data.department;
+                    annDepartment.style.display = '';
+                } else {
+                    annDepartment.style.display = 'none';
+                }
+            }
+            if (annContent) annContent.textContent = data.content || data.description || '';
 
             openModal();
         });
