@@ -22,7 +22,15 @@ document.addEventListener('DOMContentLoaded', function() {
 		qForm?.reset();
 	}
 
-	openAskBtn?.addEventListener('click', openModal);
+	openAskBtn?.addEventListener('click', function(e){
+		const logged = openAskBtn.dataset && openAskBtn.dataset.loggedIn === 'true';
+		if(!logged){
+			// not logged in -> redirect to login page
+			window.location.href = '/auth/login';
+			return;
+		}
+		openModal();
+	});
 	askModal?.addEventListener('click', function(e){
 		if(e.target.matches('[data-close="modal"], .modal-overlay')) closeModal();
 	});
